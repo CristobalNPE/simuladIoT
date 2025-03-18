@@ -5,11 +5,12 @@ import {Input} from "~/components/ui/input";
 import {Button} from "~/components/ui/button";
 import {Radio, Unplug, Wifi} from "lucide-react";
 import {useConnection} from "~/context/connection-context";
-import type {ConnectionConfig, MqttConnection, RestConnection} from "~/types/connection.types";
+import type {MqttConnection, RestConnection} from "~/types/connection.types";
 import React from "react";
 import type {DeviceType} from "~/types/device.types";
 import {HelpTooltip} from "~/components/help-tooltip";
 import {useConnectionTesting} from "~/hooks/useConnectionTesting";
+import {useSpinDelay} from "spin-delay";
 
 export function ConfigurationCard(
     {
@@ -41,6 +42,10 @@ export function ConfigurationCard(
     const restConfig = connectionType === 'rest' ? connectionConfig as RestConnection : null;
     const mqttConfig = connectionType === 'mqtt' ? connectionConfig as MqttConnection : null;
 
+    const delayedIsTestingConnection = useSpinDelay(isTestingConnection, {
+        delay: 500,
+        minDuration: 200,
+    })
 
     return (
         <Card className="col-span-1">
@@ -105,7 +110,7 @@ export function ConfigurationCard(
                                 disabled={!restConfig?.domain || !restConfig.port || !restConfig.endpoint || isTestingConnection}
                             >
                                 <Unplug className="h-4 w-4"/>
-                                {isTestingConnection ? "Probando..." : "Probar Conexión"}
+                                {delayedIsTestingConnection ? "Probando..." : "Probar Conexión"}
                             </Button>
 
                             <div
@@ -159,7 +164,7 @@ export function ConfigurationCard(
                                 disabled={!mqttConfig?.broker || !mqttConfig.port || !mqttConfig.topic || isTestingConnection}
                             >
                                 <Unplug className="h-4 w-4"/>
-                                {isTestingConnection ? "Probando..." : "Probar Conexión"}
+                                {delayedIsTestingConnection ? "Probando..." : "Probar Conexión"}
                             </Button>
 
 
@@ -189,40 +194,3 @@ export function ConfigurationCard(
 }
 
 
-function TestConnectionButton({config, connectionString}: { config: ConnectionConfig, connectionString: string }) {
-
-
-    const restConfig = config.connectionType === 'rest' ? config as RestConnection : null;
-    const mqttConfig = config.connectionType === 'mqtt' ? config as MqttConnection : null;
-
-    if (!restConfig && !mqttConfig) return null
-
-    if (restConfig) {
-        return (
-            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                <Button
-                    // onClick={testConnection}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                    disabled={!restConfig?.domain || !restConfig.port || !restConfig.endpoint}
-                >
-                    <Unplug className="h-4 w-4"/>
-                    Probar Conexión
-                </Button>
-
-                <div className="flex-1 px-3 py-2 bg-muted rounded-md text-sm font-mono overflow-hidden text-ellipsis">
-                    {connectionString}
-                </div>
-
-                {/*{connectionStatus === "success" && (*/}
-                {/*    <span className="text-green-500 text-sm flex items-center">Conectado</span>*/}
-                {/*)}*/}
-
-                {/*{connectionStatus === "error" && (*/}
-                {/*    <span className="text-red-500 text-sm flex items-center">Error de conexión</span>*/}
-                {/*)}*/}
-            </div>
-        )
-    }
-
-}
