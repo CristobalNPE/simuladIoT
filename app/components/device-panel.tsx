@@ -99,6 +99,9 @@ export function DevicePanel({
 
     return (
         <Card className="col-span-1">
+            <div>
+                <pre>{JSON.stringify(connectionConfig, null, 2)}</pre>
+            </div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="space-y-1">
                     <CardTitle className="flex items-center">
