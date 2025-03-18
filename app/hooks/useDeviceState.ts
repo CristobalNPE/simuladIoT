@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react"
 import {generateSamplePayload, SAMPLE_API_KEY} from "~/utils/payload.utils";
+import type {SensorCategory} from "~/types/sensor.types";
 
 export function useDeviceState(deviceId: string, deviceType: string) {
     const generateDeviceName = () => {
@@ -18,8 +19,10 @@ export function useDeviceState(deviceId: string, deviceType: string) {
     const [sensorApiKey, setSensorApiKey] = useState(generateApiKey())
     const [sendInterval, setSendInterval] = useState<number | null>(null)
     const [intervalTime, setIntervalTime] = useState(5)
-    const [sensorCategory, setSensorCategory] = useState("temperature")
+    const [sensorCategory, setSensorCategory] = useState<SensorCategory>("temperature")
     const [isSending, setIsSending] = useState(false)
+
+    const [useRealisticValues, setUseRealisticValues] = useState(false);
 
     const initialPayload = generateSamplePayload(sensorCategory, sensorApiKey)
     const [customPayload, setCustomPayload] = useState(JSON.stringify(initialPayload, null, 2))
@@ -47,6 +50,8 @@ export function useDeviceState(deviceId: string, deviceType: string) {
         isSending,
         setIsSending,
         sendInterval,
-        setSendInterval
+        setSendInterval,
+        useRealisticValues,
+        setUseRealisticValues
     }
 }

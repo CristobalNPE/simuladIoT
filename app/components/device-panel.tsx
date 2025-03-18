@@ -8,13 +8,13 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "~/components/ui/tabs"
 import type {ConnectionConfig} from "~/types/connection.types"
 import {useConnection} from "~/context/connection-context"
 import {useDeviceState} from "~/hooks/useDeviceState";
-import {generateSamplePayload} from "~/utils/payload.utils";
+import {addVarianceToPayload, generateSamplePayload} from "~/utils/payload.utils";
 import {sendDeviceData} from "~/services/device.service"
 import {EditDeviceDialog} from "~/components/edit-device";
 import {PayloadTab} from "~/components/payload-tab";
 import {SettingsTab} from "~/components/settings-tab";
 import type {DeviceInfo, DeviceType} from "~/types/device.types";
-import {useState} from "react";
+import {useEffect, useRef, useState} from "react";
 
 
 interface DevicePanelProps {
@@ -26,12 +26,12 @@ interface DevicePanelProps {
 }
 
 export function DevicePanel({
-                                 deviceId,
-                                 deviceType,
-                                 connectionConfig,
-                                 onRemove,
-                                 onMessageSent,
-                             }: DevicePanelProps) {
+                                deviceId,
+                                deviceType,
+                                connectionConfig,
+                                onRemove,
+                                onMessageSent,
+                            }: DevicePanelProps) {
     const {getRestEndpoint, getMqttEndpoint} = useConnection()
 
     const {
@@ -48,25 +48,102 @@ export function DevicePanel({
         isSending,
         setIsSending,
         sendInterval,
-        setSendInterval
+        setSendInterval,
+        useRealisticValues,
+        setUseRealisticValues
     } = useDeviceState(deviceId, deviceType)
 
-    // device-specific handlers:
 
+    //this is a hack to make the variance work when auto-sending is enabled before toggling variance
+    const useRealisticValuesRef = useRef(useRealisticValues)
+    useEffect(() => {
+        useRealisticValuesRef.current = useRealisticValues;
+    }, [useRealisticValues]);
+
+    // device-specific handlers:
     const handleGenerateSamplePayload = () => {
         const payload = generateSamplePayload(sensorCategory, sensorApiKey)
         setCustomPayload(JSON.stringify(payload, null, 2))
     }
 
-    const handleSendData = async () => {
+    const toggleAutoSend = () => {
+        if (sendInterval) {
+            clearInterval(sendInterval)
+            setSendInterval(null)
+            setIsSending(false)
+        } else {
+            setIsSending(true)
+            const interval = window.setInterval(() => {
+                handleSendDataWithCurrentSettings()
+            }, intervalTime * 1000)
+            setSendInterval(interval as unknown as number)
+        }
+    }
+
+    const handleSendDataWithCurrentSettings = async () => {
+        let payloadToSend = customPayload;
+
+        if (useRealisticValuesRef.current) {
+            try {
+                const payloadObj = JSON.parse(customPayload);
+                const modifiedPayload = addVarianceToPayload(payloadObj, sensorCategory);
+
+                payloadToSend = JSON.stringify(modifiedPayload, null, 2);
+
+                setCustomPayload(payloadToSend);
+            } catch (error) {
+                console.error("Error adding variance to payload:", error);
+            }
+        }
+
         const result = await sendDeviceData({
             deviceId,
-            payload: customPayload,
+            payload: payloadToSend,
             sensorApiKey,
             connectionConfig,
             restEndpoint: getRestEndpoint(),
             mqttEndpoint: getMqttEndpoint()
-        })
+        });
+
+        onMessageSent({
+            deviceType,
+            deviceName,
+            deviceId,
+            message: result.payload,
+            status: result.status
+        });
+
+        if (result.updatedPayload) {
+            setCustomPayload(result.updatedPayload);
+        }
+    };
+
+
+    //for manual clicks
+    const handleSendData = async () => {
+        let payloadToSend = customPayload;
+
+        if (useRealisticValues) {
+            try {
+                const payloadObj = JSON.parse(customPayload);
+                const modifiedPayload = addVarianceToPayload(payloadObj, sensorCategory);
+
+                payloadToSend = JSON.stringify(modifiedPayload, null, 2);
+
+                setCustomPayload(payloadToSend);
+            } catch (error) {
+                console.error("Error adding variance to payload:", error);
+            }
+        }
+
+        const result = await sendDeviceData({
+            deviceId,
+            payload: payloadToSend,
+            sensorApiKey,
+            connectionConfig,
+            restEndpoint: getRestEndpoint(),
+            mqttEndpoint: getMqttEndpoint()
+        });
 
         onMessageSent({
             deviceType,
@@ -80,21 +157,6 @@ export function DevicePanel({
             setCustomPayload(result.updatedPayload)
         }
     }
-
-    const toggleAutoSend = () => {
-        if (sendInterval) {
-            clearInterval(sendInterval)
-            setSendInterval(null)
-            setIsSending(false)
-        } else {
-            const interval = window.setInterval(() => {
-                handleSendData()
-            }, intervalTime * 1000)
-            setSendInterval(interval as unknown as number)
-            setIsSending(true)
-        }
-    }
-
 
 
     const [tab, setTab] = useState("payload")
@@ -155,6 +217,8 @@ export function DevicePanel({
                             toggleAutoSend={toggleAutoSend}
                             restEndpoint={getRestEndpoint()}
                             mqttEndpoint={getMqttEndpoint()}
+                            useRealisticValues={useRealisticValues}
+                            setUseRealisticValues={setUseRealisticValues}
                         />
                     </TabsContent>
                 </Tabs>
