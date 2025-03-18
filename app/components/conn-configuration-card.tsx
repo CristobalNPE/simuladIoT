@@ -3,16 +3,17 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "~/components/ui/tabs";
 import {Label} from "~/components/ui/label";
 import {Input} from "~/components/ui/input";
 import {Button} from "~/components/ui/button";
-import {Radio, Wifi, Zap} from "lucide-react";
+import {Radio, Unplug, Wifi} from "lucide-react";
 import {useConnection} from "~/context/connection-context";
 import type {MqttConnection, RestConnection} from "~/types/connection.types";
 import React from "react";
+import type {DeviceType} from "~/types/device.types";
 
 export function ConfigurationCard(
     {
         addDevice,
     }: {
-        addDevice: (deviceType: string) => void,
+        addDevice: (deviceType: DeviceType) => void,
     }) {
 
     const {
@@ -33,7 +34,7 @@ export function ConfigurationCard(
         <Card className="col-span-1">
             <CardHeader>
                 <CardTitle>Configuración</CardTitle>
-                <CardDescription>Configura el endpoint y detalles de conexión de tu API</CardDescription>
+                <CardDescription>Configura los detalles de conexión hacia tu API</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 flex-1">
                 <Tabs
@@ -83,7 +84,7 @@ export function ConfigurationCard(
                         </div>
                         <div className={"flex gap-2 items-center"}>
                             <Button size={"sm"} variant={"outline"}>
-                                <Zap className="mr-2 h-4 w-4"/>
+                                <Unplug className="mr-2 h-4 w-4"/>
                                 Probar Conexión
                             </Button>
                             <p className={"text-xs text-muted-foreground"}>{getRestEndpoint()}</p>
@@ -127,7 +128,7 @@ export function ConfigurationCard(
                         </div>
                         <div className={"flex gap-2 items-center"}>
                             <Button size={"sm"} variant={"outline"}>
-                                <Zap className="mr-2 h-4 w-4"/>
+                                <Unplug className="mr-2 h-4 w-4"/>
                                 Probar Conexión
                             </Button>
                             <p className={"text-xs text-muted-foreground"}>{getMqttEndpoint()}</p>
@@ -136,17 +137,15 @@ export function ConfigurationCard(
                 </Tabs>
 
             </CardContent>
-            <CardFooter className="flex justify-between border-t gap-6 items-center">
-                <div className="flex space-x-2">
-                    <Button onClick={() => addDevice("esp32")}>
-                        <Wifi className="mr-2 h-4 w-4"/>
-                        Agregar ESP32
-                    </Button>
-                    <Button onClick={() => addDevice("zigbee")}>
-                        <Radio className="mr-2 h-4 w-4"/>
-                        Agregar Zigbee
-                    </Button>
-                </div>
+            <CardFooter className="flex justify-between border-t gap-6 items-center ">
+                <Button className={"flex-1"} onClick={() => addDevice("esp32")}>
+                    <Wifi className="mr-2 h-4 w-4"/>
+                    Agregar ESP32
+                </Button>
+                <Button className={"flex-1"} onClick={() => addDevice("zigbee")}>
+                    <Radio className="mr-2 h-4 w-4"/>
+                    Agregar Zigbee
+                </Button>
             </CardFooter>
         </Card>
     )
