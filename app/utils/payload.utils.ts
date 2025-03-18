@@ -139,8 +139,8 @@ export function addVarianceToPayload(payload: SensorPayload, category: SensorCat
             const itemWithVariance = {...data};
 
             //special cases go here!!! TODO: add more
-            if (category === 'motion' && 'motion_detected' in itemWithVariance && Math.random() > 0.9) {
-                // 10% chance to change motion state
+            if (category === 'motion' && 'motion_detected' in itemWithVariance && Math.random() > 0.8) {
+                // 20% chance to change motion state
                 (itemWithVariance as MotionSensorData).motion_detected =
                     !(itemWithVariance as MotionSensorData).motion_detected;
             }
