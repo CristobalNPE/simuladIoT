@@ -5,6 +5,7 @@ import "./app.css";
 import {themeSessionResolver} from "~/sessions.server";
 import {PreventFlashOnWrongTheme, type Theme, ThemeProvider, useTheme} from "remix-themes";
 import React from "react";
+import {ConnectionProvider} from "~/context/connection-context";
 
 export const links: Route.LinksFunction = () => [
     {rel: "preconnect", href: "https://fonts.googleapis.com"},
@@ -33,9 +34,11 @@ export default function App({loaderData}: Route.ComponentProps) {
 
     return (
         <ThemeProvider specifiedTheme={theme} themeAction={"/action/set-theme"}>
-            <Document>
-                <Outlet/>
-            </Document>
+            <ConnectionProvider>
+                <Document>
+                    <Outlet/>
+                </Document>
+            </ConnectionProvider>
         </ThemeProvider>
     );
 }
