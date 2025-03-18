@@ -65,8 +65,10 @@ function MessageRow({msg}: { msg: DeviceInfoWithTimestamp }) {
                 </div>
                 <div className={"flex gap-2 items-center"}>
                     <div className=" text-xs text-muted-foreground">{msg.timestamp.toLocaleTimeString()}</div>
-                    <Badge variant={msg.status && msg.status >= 200 && msg.status < 300 ? "default" : "destructive"}>
-                        {msg.status ? `${msg.status}` : "Sent"}
+                    <Badge variant={
+                        (msg.status && msg.status >= 200 && msg.status < 300) ? "default" :
+                            (msg.status ? "destructive" : "default")}>
+                        {msg.status ? `${msg.status}` : "Enviado"}
                     </Badge>
                 </div>
             </div>
