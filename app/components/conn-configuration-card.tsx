@@ -5,9 +5,11 @@ import {Input} from "~/components/ui/input";
 import {Button} from "~/components/ui/button";
 import {Radio, Unplug, Wifi} from "lucide-react";
 import {useConnection} from "~/context/connection-context";
-import type {MqttConnection, RestConnection} from "~/types/connection.types";
+import type {ConnectionConfig, MqttConnection, RestConnection} from "~/types/connection.types";
 import React from "react";
 import type {DeviceType} from "~/types/device.types";
+import {HelpTooltip} from "~/components/help-tooltip";
+import {useConnectionTesting} from "~/hooks/useConnectionTesting";
 
 export function ConfigurationCard(
     {
@@ -26,15 +28,28 @@ export function ConfigurationCard(
         getMqttEndpoint
     } = useConnection();
 
+    const {
+        isTestingConnection,
+        testConnection,
+        ConnectionStatusBadge
+    } = useConnectionTesting();
+
+    const handleTestConnection = () => {
+        testConnection(connectionConfig);
+    }
+
     const restConfig = connectionType === 'rest' ? connectionConfig as RestConnection : null;
     const mqttConfig = connectionType === 'mqtt' ? connectionConfig as MqttConnection : null;
 
 
     return (
         <Card className="col-span-1">
-            <CardHeader>
-                <CardTitle>Configuración</CardTitle>
-                <CardDescription>Configura los detalles de conexión hacia tu API</CardDescription>
+            <CardHeader className={"flex items-center justify-between"}>
+                <div className={"flex flex-col gap-1.5"}>
+                    <CardTitle>Configuración</CardTitle>
+                    <CardDescription>Configura los detalles de conexión hacia tu API</CardDescription>
+                </div>
+                <HelpTooltip/>
             </CardHeader>
             <CardContent className="space-y-4 flex-1">
                 <Tabs
@@ -47,7 +62,7 @@ export function ConfigurationCard(
                     </TabsList>
                     <TabsContent value="http" className="space-y-4 pt-4">
 
-                        <div className={"flex gap-2"}>
+                        <div className={"flex gap-2 justify-between"}>
                             <div className="space-y-2">
                                 <Label htmlFor="rest-domain">API Domain</Label>
                                 <Input
@@ -82,12 +97,23 @@ export function ConfigurationCard(
                                 />
                             </div>
                         </div>
-                        <div className={"flex gap-2 items-center"}>
-                            <Button size={"sm"} variant={"outline"}>
-                                <Unplug className="mr-2 h-4 w-4"/>
-                                Probar Conexión
+                        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                            <Button
+                                onClick={handleTestConnection}
+                                variant="outline"
+                                className="flex items-center gap-2"
+                                disabled={!restConfig?.domain || !restConfig.port || !restConfig.endpoint || isTestingConnection}
+                            >
+                                <Unplug className="h-4 w-4"/>
+                                {isTestingConnection ? "Probando..." : "Probar Conexión"}
                             </Button>
-                            <p className={"text-xs text-muted-foreground"}>{getRestEndpoint()}</p>
+
+                            <div
+                                className="flex-1 px-3 py-2 bg-muted rounded-md text-sm font-mono overflow-hidden text-ellipsis">
+                                {getRestEndpoint()}
+                            </div>
+
+                            <ConnectionStatusBadge type={"http"}/>
                         </div>
                     </TabsContent>
                     <TabsContent value="mqtt" className=" pt-4 space-y-4 ">
@@ -126,12 +152,24 @@ export function ConfigurationCard(
                                 />
                             </div>
                         </div>
-                        <div className={"flex gap-2 items-center"}>
-                            <Button size={"sm"} variant={"outline"}>
+                        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={handleTestConnection}
+                                disabled={!mqttConfig?.broker || !mqttConfig.port || !mqttConfig.topic || isTestingConnection}
+                            >
                                 <Unplug className="mr-2 h-4 w-4"/>
-                                Probar Conexión
+                                {isTestingConnection ? "Probando..." : "Probar Conexión"}
                             </Button>
-                            <p className={"text-xs text-muted-foreground"}>{getMqttEndpoint()}</p>
+
+
+                            <div
+                                className="flex-1 px-3 py-2 bg-muted rounded-md text-sm font-mono overflow-hidden text-ellipsis">
+                                {getMqttEndpoint()}
+                            </div>
+
+                            <ConnectionStatusBadge type={"mqtt"}/>
                         </div>
                     </TabsContent>
                 </Tabs>
@@ -149,4 +187,43 @@ export function ConfigurationCard(
             </CardFooter>
         </Card>
     )
+}
+
+
+function TestConnectionButton({config, connectionString}: { config: ConnectionConfig, connectionString: string }) {
+
+
+    const restConfig = config.connectionType === 'rest' ? config as RestConnection : null;
+    const mqttConfig = config.connectionType === 'mqtt' ? config as MqttConnection : null;
+
+    if (!restConfig && !mqttConfig) return null
+
+    if (restConfig) {
+        return (
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                <Button
+                    // onClick={testConnection}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    disabled={!restConfig?.domain || !restConfig.port || !restConfig.endpoint}
+                >
+                    <Unplug className="h-4 w-4"/>
+                    Probar Conexión
+                </Button>
+
+                <div className="flex-1 px-3 py-2 bg-muted rounded-md text-sm font-mono overflow-hidden text-ellipsis">
+                    {connectionString}
+                </div>
+
+                {/*{connectionStatus === "success" && (*/}
+                {/*    <span className="text-green-500 text-sm flex items-center">Conectado</span>*/}
+                {/*)}*/}
+
+                {/*{connectionStatus === "error" && (*/}
+                {/*    <span className="text-red-500 text-sm flex items-center">Error de conexión</span>*/}
+                {/*)}*/}
+            </div>
+        )
+    }
+
 }
