@@ -13,14 +13,15 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "~/components/ui/dialog"
+import type {SensorCategory} from "~/types/sensor.types";
 
 interface EditDeviceDialogProps {
     deviceName: string
     setDeviceName: (value: string) => void
     sensorApiKey: string
     setSensorApiKey: (value: string) => void
-    sensorCategory: string
-    setSensorCategory: (value: string) => void
+    sensorCategory: SensorCategory
+    setSensorCategory: (value: SensorCategory) => void
     generateSamplePayload: () => void
 }
 
@@ -89,7 +90,7 @@ export function EditDeviceDialog({
                     </div>
                 </div>
                 <DialogFooter>
-                    <DialogClose>
+                    <DialogClose asChild>
                         <Button onClick={generateSamplePayload}>
                             <Sparkles className="mr-1 h-4 w-4" />
                             Generar Payload
