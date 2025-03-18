@@ -6,6 +6,8 @@ import {themeSessionResolver} from "~/sessions.server";
 import {PreventFlashOnWrongTheme, type Theme, ThemeProvider, useTheme} from "remix-themes";
 import React from "react";
 import {ConnectionProvider} from "~/context/connection-context";
+import {TooltipProvider} from "~/components/ui/tooltip";
+import {Toaster} from "sonner";
 
 export const links: Route.LinksFunction = () => [
     {rel: "preconnect", href: "https://fonts.googleapis.com"},
@@ -35,9 +37,11 @@ export default function App({loaderData}: Route.ComponentProps) {
     return (
         <ThemeProvider specifiedTheme={theme} themeAction={"/action/set-theme"}>
             <ConnectionProvider>
-                <Document>
-                    <Outlet/>
-                </Document>
+                <TooltipProvider>
+                    <Document>
+                        <Outlet/>
+                    </Document>
+                </TooltipProvider>
             </ConnectionProvider>
         </ThemeProvider>
     );
@@ -59,6 +63,7 @@ export function Document({children}: { children: React.ReactNode }) {
         </head>
         <body className={"min-h-[100dvh] !bg-background"}>
         {children}
+        <Toaster/>
         <ScrollRestoration/>
         <Scripts/>
         </body>
