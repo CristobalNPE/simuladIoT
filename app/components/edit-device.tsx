@@ -5,6 +5,7 @@ import { Edit, Sparkles } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -88,10 +89,13 @@ export function EditDeviceDialog({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button onClick={generateSamplePayload}>
-                        <Sparkles className="mr-1 h-4 w-4" />
-                        Generar Payload
-                    </Button>
+                    <DialogClose>
+                        <Button onClick={generateSamplePayload}>
+                            <Sparkles className="mr-1 h-4 w-4" />
+                            Generar Payload
+                        </Button>
+                    </DialogClose>
+
                 </DialogFooter>
             </DialogContent>
         </Dialog>

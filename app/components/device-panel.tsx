@@ -51,7 +51,8 @@ export function DevicePanel({
         setSendInterval
     } = useDeviceState(deviceId, deviceType)
 
-    // Device-specific handlers
+    // device-specific handlers:
+
     const handleGenerateSamplePayload = () => {
         const payload = generateSamplePayload(sensorCategory, sensorApiKey)
         setCustomPayload(JSON.stringify(payload, null, 2))
@@ -95,13 +96,11 @@ export function DevicePanel({
     }
 
 
+
     const [tab, setTab] = useState("payload")
 
     return (
         <Card className="col-span-1">
-            <div>
-                <pre>{JSON.stringify(connectionConfig, null, 2)}</pre>
-            </div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="space-y-1">
                     <CardTitle className="flex items-center">
@@ -113,7 +112,7 @@ export function DevicePanel({
                         {isSending && (
                             <Badge variant="outline" className="ml-2 animate-pulse">
                                 <RefreshCw className="mr-1 h-3 w-3 animate-spin"/>
-                                Auto-sending
+                                Enviando...
                             </Badge>
                         )}
                     </CardDescription>

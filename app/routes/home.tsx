@@ -7,6 +7,7 @@ import {DevicePanel} from "~/components/device-panel";
 import {StatusCard} from "~/components/status-card";
 import {MessageHistoryCard} from "~/components/message-history-card";
 import type {DeviceInfo, DeviceInfoWithTimestamp, DeviceType} from "~/types/device.types";
+import type {ConnectionConfig} from "~/types/connection.types";
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -23,9 +24,19 @@ export default function Home() {
     const [messageHistory, setMessageHistory] = useState<DeviceInfoWithTimestamp[]>([])
 
     const [activeDevices, setActiveDevices] = useState<string[]>([])
+    const [deviceConfigs, setDeviceConfigs] = useState<Record<string, ConnectionConfig>>({});
+
+
     const addDevice = (deviceType: DeviceType) => {
         const deviceId = `${deviceType}-${Date.now()}`
+        const deviceConnectionConfig = JSON.parse(JSON.stringify(connectionConfig));
+
         setActiveDevices([...activeDevices, deviceId])
+        setDeviceConfigs(prev => ({
+                ...prev,
+                [deviceId]: deviceConnectionConfig
+            }
+        ))
     }
 
     const removeDevice = (deviceId: string) => {
@@ -79,7 +90,7 @@ export default function Home() {
                             key={deviceId}
                             deviceId={deviceId}
                             deviceType={deviceId.split("-")[0] as DeviceType}
-                            connectionConfig={connectionConfig}
+                            connectionConfig={deviceConfigs[deviceId]}
                             onRemove={() => removeDevice(deviceId)}
                             onMessageSent={handleMessageSent}
                         />

@@ -154,12 +154,11 @@ export function ConfigurationCard(
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                             <Button
-                                size="sm"
                                 variant="outline"
                                 onClick={handleTestConnection}
                                 disabled={!mqttConfig?.broker || !mqttConfig.port || !mqttConfig.topic || isTestingConnection}
                             >
-                                <Unplug className="mr-2 h-4 w-4"/>
+                                <Unplug className="h-4 w-4"/>
                                 {isTestingConnection ? "Probando..." : "Probar Conexión"}
                             </Button>
 
