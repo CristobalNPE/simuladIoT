@@ -12,6 +12,8 @@ interface SettingsTabProps {
     toggleAutoSend: () => void
     restEndpoint: string
     mqttEndpoint: string
+    useRealisticValues: boolean
+    setUseRealisticValues: (value: boolean) => void
 }
 
 export function SettingsTab({
@@ -23,6 +25,8 @@ export function SettingsTab({
                                 toggleAutoSend,
                                 restEndpoint,
                                 mqttEndpoint,
+                                useRealisticValues,
+                                setUseRealisticValues
                             }: SettingsTabProps) {
     return (
         <>
@@ -40,12 +44,31 @@ export function SettingsTab({
                     onValueChange={(value) => setIntervalTime(value[0])}
                 />
             </div>
-            <div className="flex items-center space-x-2">
-                <Switch id={`auto-send-${deviceId}`} checked={isSending} onCheckedChange={toggleAutoSend} />
-                <Label htmlFor={`auto-send-${deviceId}`}>Enviar automáticamente</Label>
+            <div className={"h-2"}/>
+            <div className={"space-y-2"}>
+                <div className="flex items-center justify-between">
+                    <Label htmlFor={`auto-send-${deviceId}`}>Enviar automáticamente</Label>
+                    <Switch id={`auto-send-${deviceId}`} checked={isSending} onCheckedChange={toggleAutoSend}/>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                    Enviar valores automáticamente a tu API cada X segundos definidos en el intervalo.
+                </p>
+            </div>
+            <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                    <Label htmlFor={`realistic-${deviceId}`}>Sensor realista</Label>
+                    <Switch
+                        id={`realistic-${deviceId}`}
+                        checked={useRealisticValues}
+                        onCheckedChange={setUseRealisticValues}
+                    />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                    Si está activado, los valores variarán ligeramente con cada envío automático para simular el comportamiento real un sensor.
+                </p>
             </div>
 
-            <div className={"h-4"}/>
+            <div className={"h-2"}/>
             {deviceType === "esp32" ? (
                 <div className="space-y-2">
                     <Label>Endpoint</Label>
