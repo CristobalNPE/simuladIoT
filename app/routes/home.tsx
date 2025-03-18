@@ -1,6 +1,6 @@
 import type {Route} from "./+types/home";
 import {ThemeSwitch} from "~/components/theme-switch";
-import {useState} from "react";
+import React, {useState} from "react";
 import {ConfigurationCard} from "~/components/conn-configuration-card";
 import {useConnection} from "~/context/connection-context";
 import {DevicePanel} from "~/components/device-panel";
