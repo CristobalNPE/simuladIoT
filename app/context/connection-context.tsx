@@ -21,7 +21,7 @@ export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({children}
     const [endpoint, setEndpoint] = useState('/api/v1/sensor_data');
 
     const [broker, setBroker] = useState('localhost');
-    const [mqttPort, setMqttPort] = useState(1883);
+    const [mqttPort, setMqttPort] = useState(9001);
     const [topic, setTopic] = useState('iot/sensors');
 
     const [connectionType, setConnectionType] = useState<'rest' | 'mqtt'>('rest');
@@ -52,7 +52,7 @@ export const ConnectionProvider: React.FC<{ children: ReactNode }> = ({children}
     const getMqttEndpoint = (): string => {
         if (!broker || !mqttPort || !topic) return "";
 
-        return `mqtt://${broker}:${mqttPort}/${topic}`;
+        return `ws://${broker}:${mqttPort}/${topic}`;
     };
 
     return (
