@@ -2,13 +2,13 @@
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "~/components/ui/card"
 import {Button} from "~/components/ui/button"
 import {Badge} from "~/components/ui/badge"
-import {Radio, RefreshCw, Send, Trash2, Wifi} from "lucide-react"
+import {Edit, Key, Radio, RefreshCw, Send, Trash2, Wifi} from "lucide-react"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "~/components/ui/tabs"
 
 import type {ConnectionConfig} from "~/types/connection.types"
 import {useConnection} from "~/context/connection-context"
 import {useDeviceState} from "~/hooks/useDeviceState";
-import {addVarianceToPayload, generateSamplePayload} from "~/utils/payload.utils";
+import {addVarianceToPayload, generateSamplePayload, SAMPLE_API_KEY} from "~/utils/payload.utils";
 import {sendDeviceData} from "~/services/device.service"
 import {EditDeviceDialog} from "~/components/edit-device";
 import {PayloadTab} from "~/components/payload-tab";
@@ -110,7 +110,8 @@ export function DevicePanel({
             deviceName,
             deviceId,
             message: result.payload,
-            status: result.status
+            status: result.status,
+            errorDetails: result.message
         });
 
         if (result.updatedPayload) {
@@ -145,12 +146,15 @@ export function DevicePanel({
             mqttEndpoint: getMqttEndpoint()
         });
 
+
         onMessageSent({
             deviceType,
             deviceName,
             deviceId,
             message: result.payload,
-            status: result.status
+            status: result.status,
+            errorDetails: result.message
+
         })
 
         if (result.updatedPayload) {
@@ -160,6 +164,8 @@ export function DevicePanel({
 
 
     const [tab, setTab] = useState("payload")
+    let apiKey = JSON.parse(customPayload).api_key;
+    const isValidApiKey = apiKey !== SAMPLE_API_KEY && apiKey !== "" && apiKey !== null;
 
     return (
         <Card className="col-span-1">
@@ -188,7 +194,11 @@ export function DevicePanel({
                         sensorCategory={sensorCategory}
                         setSensorCategory={setSensorCategory}
                         generateSamplePayload={handleGenerateSamplePayload}
-                    />
+                    >
+                        <Button variant="outline" size="icon">
+                            <Edit className="h-4 w-4" />
+                        </Button>
+                    </EditDeviceDialog>
                     <Button variant="outline" size="icon" onClick={onRemove}>
                         <Trash2 className="h-4 w-4"/>
                     </Button>
@@ -198,10 +208,11 @@ export function DevicePanel({
                 <Tabs value={tab} onValueChange={setTab}>
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="payload">Payload</TabsTrigger>
-                        <TabsTrigger value="settings">Ajustes</TabsTrigger>
+                        <TabsTrigger disabled={!isValidApiKey} value="settings">Ajustes</TabsTrigger>
                     </TabsList>
                     <TabsContent value="payload" className="space-y-4 pt-4">
                         <PayloadTab
+                            disabled={!isValidApiKey}
                             deviceId={deviceId}
                             customPayload={customPayload}
                             setCustomPayload={setCustomPayload}
@@ -225,16 +236,33 @@ export function DevicePanel({
             </CardContent>
             <CardFooter className="flex justify-between gap-1">
                 {
-                    tab === "payload" && <>
-                        <Button variant="outline" onClick={handleGenerateSamplePayload}>
-                            <RefreshCw className="mr-2 h-4 w-4"/>
-                            Regenerar
-                        </Button>
-                        <Button onClick={handleSendData}>
-                            <Send className="mr-2 h-4 w-4"/>
-                            Enviar Datos
-                        </Button>
-                    </>
+                    !isValidApiKey ? (
+                            <EditDeviceDialog
+                                deviceName={deviceName}
+                                setDeviceName={setDeviceName}
+                                sensorApiKey={sensorApiKey}
+                                setSensorApiKey={setSensorApiKey}
+                                sensorCategory={sensorCategory}
+                                setSensorCategory={setSensorCategory}
+                                generateSamplePayload={handleGenerateSamplePayload}
+                            >
+                                <Button className={"flex-1"}>
+                                    <Key/>  Ingresar API Key del sensor
+                                </Button>
+                            </EditDeviceDialog>
+
+                        ) :
+
+                        tab === "payload" && <>
+                            <Button variant="outline" onClick={handleGenerateSamplePayload}>
+                                <RefreshCw className="mr-2 h-4 w-4"/>
+                                Regenerar
+                            </Button>
+                            <Button onClick={handleSendData}>
+                                <Send className="mr-2 h-4 w-4"/>
+                                Enviar Datos
+                            </Button>
+                        </>
                 }
             </CardFooter>
         </Card>
