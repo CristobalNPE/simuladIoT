@@ -53,6 +53,23 @@ function MessageRow({msg}: { msg: DeviceInfoWithTimestamp }) {
 
     const formattedDeviceId = `${msg.deviceId.toUpperCase().split("-")[0]}-[${msg.deviceId.toUpperCase().split("-")[1].slice(-4)}]`
 
+    const getStatusDisplay = () => {
+        if (msg.deviceType === "zigbee") {
+            return {
+                text: "Enviado",
+                variant: (msg.status && msg.status >= 200 && msg.status < 300) ? "default" : "destructive"
+            };
+        }
+        else {
+            return {
+                text: msg.status ? `${msg.status}` : "Enviado",
+                variant: (msg.status && msg.status >= 200 && msg.status < 300) ? "default" : "destructive"
+            };
+        }
+    };
+
+    const statusDisplay = getStatusDisplay();
+
     return (
         <div className="rounded-lg border p-3 pb-1">
             <div className="flex items-center justify-between">
@@ -68,10 +85,8 @@ function MessageRow({msg}: { msg: DeviceInfoWithTimestamp }) {
                 </div>
                 <div className={"flex gap-2 items-center"}>
                     <div className=" text-xs text-muted-foreground">{msg.timestamp.toLocaleTimeString()}</div>
-                    <Badge variant={
-                        (msg.status && msg.status >= 200 && msg.status < 300) ? "default" :
-                            (msg.status ? "destructive" : "default")}>
-                        {msg.status ? `${msg.status}` : "Enviado"}
+                    <Badge variant={statusDisplay.variant as "default" | "destructive"}>
+                        {statusDisplay.text}
                     </Badge>
                 </div>
             </div>

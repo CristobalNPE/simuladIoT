@@ -61,7 +61,6 @@ class MqttService {
                     console.error(`Error publishing to ${topic}:`, err);
                     reject(err);
                 } else {
-                    console.log(`Message published to ${topic}:`, payload);
                     resolve();
                 }
             });
