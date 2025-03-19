@@ -36,6 +36,7 @@ export function SettingsTab({
                     <span className="text-sm">{intervalTime}s</span>
                 </div>
                 <Slider
+                    disabled={isSending}
                     id={`interval-${deviceId}`}
                     min={1}
                     max={30}
