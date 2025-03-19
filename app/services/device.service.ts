@@ -15,12 +15,11 @@ interface SendDataResult {
     success: boolean
     payload: string
     status?: number
-    error?: string
+    message?: string
     updatedPayload?: string
 }
 
 export async function sendDeviceData({
-                                         deviceId,
                                          payload,
                                          sensorApiKey,
                                          connectionConfig,
@@ -28,14 +27,13 @@ export async function sendDeviceData({
                                          mqttEndpoint
                                      }: SendDataParams): Promise<SendDataResult> {
     try {
-        // Prepare and validate the payload
         const prepared = preparePayloadForSending(payload, sensorApiKey)
 
         if (!prepared.valid) {
             return {
                 success: false,
                 payload: payload,
-                error: prepared.error || "Invalid payload",
+                message: prepared.error || "Invalid payload",
                 status: 400,
                 updatedPayload: undefined
             }
@@ -43,7 +41,6 @@ export async function sendDeviceData({
 
         const preparedPayloadString = JSON.stringify(prepared.payload)
 
-        // Send via REST or MQTT depending on connection type
         if (connectionConfig.connectionType === 'rest') {
             const restConfig = connectionConfig as RestConnection
             return await sendRestData(preparedPayloadString, restEndpoint)
@@ -56,14 +53,13 @@ export async function sendDeviceData({
         return {
             success: false,
             payload: payload,
-            error: error instanceof Error ? error.message : "Unknown error",
+            message: error instanceof Error ? error.message : "Unknown error",
             status: 500,
             updatedPayload: undefined
         }
     }
 }
 
-// REST API data sending
 async function sendRestData(payload: string, endpoint: string): Promise<SendDataResult> {
     try {
         const response = await fetch(endpoint, {
@@ -74,10 +70,23 @@ async function sendRestData(payload: string, endpoint: string): Promise<SendData
             body: payload,
         })
 
+        // try to get more detailed error message if available
+        let errorMessage = "";
+        try {
+            const responseData = await response.clone().json();
+            if (responseData.message || responseData.error) {
+                errorMessage = responseData.message || responseData.error;
+            }
+        } catch {
+            // if we can't parse the response as JSON, use status text
+            errorMessage = response.statusText;
+        }
+
         return {
             success: response.ok,
             payload: payload,
             status: response.status,
+            message: response.ok ? "Solicitud completada exitosamente" : errorMessage || `Error ${response.status}`,
             updatedPayload: payload
         }
     } catch (error) {
@@ -85,13 +94,13 @@ async function sendRestData(payload: string, endpoint: string): Promise<SendData
         return {
             success: false,
             payload: payload,
-            error: error instanceof Error ? error.message : "REST request failed",
+            message: error instanceof Error ? error.message : "REST request failed",
             status: 500
+
         }
     }
 }
 
-// MQTT data sending (via the MQTT service)
 async function sendMqttData(
     payload: string,
     mqttConfig: MqttConnection,
@@ -108,6 +117,8 @@ async function sendMqttData(
         return {
             success: true,
             payload: payload,
+            message: "Mensaje MQTT enviado correctamente",
+            status: 200,
             updatedPayload: payload
         }
     } catch (error) {
@@ -115,7 +126,8 @@ async function sendMqttData(
         return {
             success: false,
             payload: payload,
-            error: error instanceof Error ? error.message : "MQTT send failed"
+            message: error instanceof Error ? error.message : "MQTT send failed",
+            status: 500
         }
     }
 }
