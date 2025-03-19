@@ -10,8 +10,9 @@ export type DeviceInfo = {
     deviceType: DeviceType,
     deviceName: string,
     deviceId: string,
-    message: string,
-    status?: number
+    status?: number;
+    message: string;
+    errorDetails?: string
 }
 
 export type DeviceInfoWithTimestamp = DeviceInfo & {
