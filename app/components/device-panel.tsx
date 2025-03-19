@@ -15,6 +15,7 @@ import {PayloadTab} from "~/components/payload-tab";
 import {SettingsTab} from "~/components/settings-tab";
 import type {DeviceInfo, DeviceType} from "~/types/device.types";
 import {useEffect, useRef, useState} from "react";
+import {formatJSONMessage} from "~/utils/format.utils";
 
 
 interface DevicePanelProps {
@@ -158,7 +159,7 @@ export function DevicePanel({
         })
 
         if (result.updatedPayload) {
-            setCustomPayload(result.updatedPayload)
+            setCustomPayload(formatJSONMessage(result.updatedPayload))
         }
     }
 
