@@ -77,7 +77,7 @@ export function ConfigurationCard(
                 </div>
                 <HelpTooltip/>
             </CardHeader>
-            <CardContent className="space-y-4 flex-1">
+            <CardContent className="space-y-4 flex-1 ">
                 <Tabs
                     defaultValue={connectionType === "mqtt" ? "mqtt" : "http"}
                     onValueChange={(value) => setConnectionType(value === 'mqtt' ? 'mqtt' : 'rest')}

@@ -10,6 +10,9 @@ import type {DeviceInfo, DeviceInfoWithTimestamp, DeviceType} from "~/types/devi
 import type {ConnectionConfig} from "~/types/connection.types";
 import {ExternalLink, Github} from "lucide-react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "~/components/ui/tooltip";
+import Logo from "~/assets/simuladiot-logo.svg"
+import LogoLight from "~/assets/simuladiot-logo-light.svg"
+import {AppLogo} from "~/components/app-logo";
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -63,17 +66,19 @@ export default function Home() {
     }
 
 
-
     return (
         <>
             <header className={"flex items-center justify-between p-4 border-b border-border shadow-xs"}>
                 <div className={"container mx-auto flex items-center gap-4 justify-between"}>
-                    <div>
-                        <h1 className={"text-lg font-semibold"}>SimulaDIoT - Simulador de Dispositivos IOT</h1>
-                        <p className={"text-xs text-muted-foreground "}>
-                            Prueba tu API con dispositivos ESP32 y Zigbee simulados. Configura y envía datos a tu
-                            servidor.
-                        </p>
+                    <div className={"flex items-center gap-4 "}>
+                        <AppLogo/>
+                        <div>
+                            <h1 className={"text-lg font-semibold"}>SimulaDIoT - Simulador de Dispositivos IOT</h1>
+                            <p className={"text-xs text-muted-foreground "}>
+                                Prueba tu API con dispositivos ESP32 y Zigbee simulados. Configura y envía datos a tu
+                                servidor.
+                            </p>
+                        </div>
                     </div>
                     <div className={"flex items-center gap-4"}>
                         <GithubLink/>
