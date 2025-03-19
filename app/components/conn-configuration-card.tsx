@@ -6,7 +6,7 @@ import {Button} from "~/components/ui/button";
 import {Radio, Unplug, Wifi} from "lucide-react";
 import {useConnection} from "~/context/connection-context";
 import type {MqttConnection, RestConnection} from "~/types/connection.types";
-import React from "react";
+import React, {useEffect, useState} from "react";
 import type {DeviceType} from "~/types/device.types";
 import {HelpTooltip} from "~/components/help-tooltip";
 import {useConnectionTesting} from "~/hooks/useConnectionTesting";
@@ -46,6 +46,27 @@ export function ConfigurationCard(
         delay: 500,
         minDuration: 200,
     })
+
+    const [pendingDevice, setPendingDevice] = useState<DeviceType | null>(null);
+
+    useEffect(() => {
+        if (pendingDevice) {
+            addDevice(pendingDevice);
+            setPendingDevice(null);
+        }
+    }, [connectionType, pendingDevice, addDevice]);
+
+    const handleAddDevice = (deviceType: DeviceType) => {
+        if (deviceType === "zigbee" && connectionType !== "mqtt") {
+            setConnectionType("mqtt");
+            setPendingDevice(deviceType);
+        } else if (deviceType === "esp32" && connectionType !== "rest") {
+            setConnectionType("rest");
+            setPendingDevice(deviceType);
+        } else {
+            addDevice(deviceType);
+        }
+    }
 
     return (
         <Card className="col-span-1">
@@ -180,11 +201,11 @@ export function ConfigurationCard(
 
             </CardContent>
             <CardFooter className="flex justify-between border-t gap-6 items-center ">
-                <Button className={"flex-1"} onClick={() => addDevice("esp32")}>
+                <Button className={"flex-1"} onClick={() => handleAddDevice("esp32")}>
                     <Wifi className="mr-2 h-4 w-4"/>
                     Agregar ESP32
                 </Button>
-                <Button className={"flex-1"} onClick={() => addDevice("zigbee")}>
+                <Button className={"flex-1"} onClick={() => handleAddDevice("zigbee")}>
                     <Radio className="mr-2 h-4 w-4"/>
                     Agregar Zigbee
                 </Button>

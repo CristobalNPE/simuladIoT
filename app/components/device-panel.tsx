@@ -1,4 +1,3 @@
-// components/DevicePanel.tsx
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "~/components/ui/card"
 import {Button} from "~/components/ui/button"
 import {Badge} from "~/components/ui/badge"
@@ -170,6 +169,7 @@ export function DevicePanel({
 
     return (
         <Card className="col-span-1">
+            {/*<pre>{JSON.stringify(connectionConfig, null, 2)}</pre>*/}
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="space-y-1">
                     <CardTitle className="flex items-center">
