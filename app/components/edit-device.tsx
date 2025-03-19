@@ -1,8 +1,8 @@
-import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Label } from "~/components/ui/label"
-import { Edit, Sparkles } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
+import {Button} from "~/components/ui/button"
+import {Input} from "~/components/ui/input"
+import {Label} from "~/components/ui/label"
+import {Sparkles} from "lucide-react"
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "~/components/ui/select"
 import {
     Dialog,
     DialogClose,
@@ -16,6 +16,7 @@ import {
 import type {SensorCategory} from "~/types/sensor.types";
 
 interface EditDeviceDialogProps {
+    children: React.ReactNode
     deviceName: string
     setDeviceName: (value: string) => void
     sensorApiKey: string
@@ -26,6 +27,7 @@ interface EditDeviceDialogProps {
 }
 
 export function EditDeviceDialog({
+                                     children,
                                      deviceName,
                                      setDeviceName,
                                      sensorApiKey,
@@ -37,9 +39,7 @@ export function EditDeviceDialog({
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline" size="icon">
-                    <Edit className="h-4 w-4" />
-                </Button>
+                {children}
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -65,6 +65,7 @@ export function EditDeviceDialog({
                         <Input
                             onFocus={(e) => e.target.select()}
                             autoFocus
+                            autoComplete={"off"}
                             id="api-key"
                             value={sensorApiKey}
                             onChange={(e) => setSensorApiKey(e.target.value)}
@@ -77,7 +78,7 @@ export function EditDeviceDialog({
                         </Label>
                         <Select value={sensorCategory} onValueChange={setSensorCategory}>
                             <SelectTrigger className="col-span-3">
-                                <SelectValue placeholder="Seleccione una categoría" />
+                                <SelectValue placeholder="Seleccione una categoría"/>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="temperature">Temperatura y Humedad</SelectItem>
@@ -92,7 +93,7 @@ export function EditDeviceDialog({
                 <DialogFooter>
                     <DialogClose asChild>
                         <Button onClick={generateSamplePayload}>
-                            <Sparkles className="mr-1 h-4 w-4" />
+                            <Sparkles className="mr-1 h-4 w-4"/>
                             Generar Payload
                         </Button>
                     </DialogClose>
