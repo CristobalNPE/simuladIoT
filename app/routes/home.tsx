@@ -10,8 +10,6 @@ import type {DeviceInfo, DeviceInfoWithTimestamp, DeviceType} from "~/types/devi
 import type {ConnectionConfig} from "~/types/connection.types";
 import {ExternalLink, Github} from "lucide-react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "~/components/ui/tooltip";
-import {Button} from "~/components/ui/button";
-import {Outlet, useRouteError} from "react-router";
 
 export function meta({}: Route.MetaArgs) {
     return [
