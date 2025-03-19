@@ -10,6 +10,8 @@ import type {DeviceInfo, DeviceInfoWithTimestamp, DeviceType} from "~/types/devi
 import type {ConnectionConfig} from "~/types/connection.types";
 import {ExternalLink, Github} from "lucide-react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "~/components/ui/tooltip";
+import {Button} from "~/components/ui/button";
+import {Outlet, useRouteError} from "react-router";
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -46,17 +48,23 @@ export default function Home() {
     }
 
     const handleMessageSent = (deviceInfo: DeviceInfo) => {
-        setMessageHistory([{...deviceInfo, timestamp: new Date()}, ...messageHistory].slice(0, 100))
+        setMessageHistory(prevHistory =>
+            [{...deviceInfo, timestamp: new Date()}, ...prevHistory].slice(0, 100)
+        );
 
-        if (deviceInfo.status) {
+        if (deviceInfo.status !== undefined) {
             setLastResponse({
                 status: deviceInfo.status,
-                message: deviceInfo.status >= 200 && deviceInfo.status < 300
-                    ? "La ultima solicitud fue completada exitosamente."
-                    : "Error"
-            })
+                message: deviceInfo.message || deviceInfo.errorDetails || (
+                    deviceInfo.status >= 200 && deviceInfo.status < 300
+                        ? "La última solicitud fue completada exitosamente."
+                        : "Error desconocido"
+                )
+            });
         }
     }
+
+
 
     return (
         <>
@@ -73,13 +81,10 @@ export default function Home() {
                         <GithubLink/>
                         <ThemeSwitch/>
                     </div>
-
                 </div>
             </header>
 
-
             <main className={"py-4 container mx-auto space-y-6"}>
-
                 <div className={"grid gap-6 lg:grid-cols-2"}>
                     <div className={"space-y-6"}>
                         <ConfigurationCard addDevice={addDevice}/>
