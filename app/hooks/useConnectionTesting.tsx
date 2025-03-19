@@ -56,7 +56,7 @@ async function testMqttConnection(config: MqttConnection): Promise<{ success: bo
             client.on('connect', () => {
                 clearTimeout(timeout);
                 client.end();
-                resolve({success: true, message: 'Conexión exitosa'});
+                resolve({success: true, message: 'Conexión activa y disponible para solicitudes.'});
             });
 
             client.on('error', (err) => {
@@ -109,7 +109,7 @@ export function useConnectionTesting() {
             }
 
             if (result.success) {
-                toast.success("Conexión exitosa")
+                toast.success("Conexión activa y disponible para solicitudes.")
             } else {
                 toast.error(result.message)
             }
