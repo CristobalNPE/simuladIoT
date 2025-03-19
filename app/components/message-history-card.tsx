@@ -15,15 +15,18 @@ export function MessageHistoryCard(
     }
 ) {
 
+    const description = messageHistory.length !== 1
+        ? `Mostrando las ultimas ${messageHistory.length} solicitudes a tu API.`
+        : `Mostrando la solitud mas reciente a tu API.`
 
     return (
         <Card className="col-span-1">
             <CardHeader>
                 <CardTitle>Historial de Mensajes</CardTitle>
-                <CardDescription>Datos recientes enviados a tu API</CardDescription>
+                <CardDescription>{description}</CardDescription>
             </CardHeader>
             <CardContent className={"flex-1"}>
-                <ScrollArea className="h-[300px] w-full rounded-md border p-2">
+                <ScrollArea className="h-[320px] w-full rounded-md border p-2">
                     {messageHistory.length > 0 ? (
                         <div className="space-y-2">
                             {messageHistory.map((msg, i) => (
