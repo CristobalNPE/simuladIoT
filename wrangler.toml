@@ -1,0 +1,12 @@
+name = "iot-device-simulator"
+compatibility_date = "2023-06-28"
+compatibility_flags = ["nodejs_compat"]
+
+[site]
+bucket = "./build/client"
+
+[build]
+command = "npm run build"
+
+[build.environment]
+NODE_VERSION = "20"
