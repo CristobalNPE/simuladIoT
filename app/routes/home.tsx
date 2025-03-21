@@ -8,7 +8,9 @@ export function meta({}: Route.MetaArgs) {
     ];
 }
 
-export async function clientLoader({request}: Route.ClientLoaderArgs) {
+
+
+export async function loader({request}: Route.ClientLoaderArgs) {
     return redirect("/settings")
 }
 
