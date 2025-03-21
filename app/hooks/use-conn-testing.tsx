@@ -16,7 +16,7 @@ async function testHttpConnection(settings: HttpConnectionSettings): Promise<{
     message: string
 }> {
     try {
-        const baseUrl = `${settings.isLocal? 'http':'https'}://${settings.domain}:${settings.port}`;
+        const baseUrl = `${settings.isLocal ? 'http' : 'https'}://${settings.domain}:${settings.port}`;
 
         const response = await fetch(baseUrl, {
             method: "HEAD",
@@ -82,7 +82,7 @@ async function testMqttConnection(config: MqttConnectionSettings): Promise<{ suc
 }
 
 
-export function useConnectionTesting() {
+export function useConnTesting() {
     const [isTestingConnection, setIsTestingConnection] = useState(false);
 
     const [httpConnectionResult, setHttpConnectionResult] = useState<{
@@ -98,6 +98,11 @@ export function useConnectionTesting() {
 
     const testConnection = async (settings: ConnectionSettings) => {
         setIsTestingConnection(true);
+
+
+        const serverName = isHttpConnectionSettings(settings)
+            ? `${settings.domain}:${settings.port}`
+            : `${settings.broker}:${settings.port}`
 
         try {
             let result;
@@ -115,7 +120,7 @@ export function useConnectionTesting() {
             }
 
             if (result.success) {
-                toast.success(`Conexión activa y disponible para solicitudes.`)
+                toast.success(`[${serverName}] parece activo y responde de forma positiva.`)
             } else {
                 toast.error(result.message)
             }
