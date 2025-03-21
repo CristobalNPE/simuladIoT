@@ -14,3 +14,6 @@ export async function loader({request}: Route.ClientLoaderArgs) {
     return redirect("/settings")
 }
 
+export function HydrateFallback(){
+    return <div>Cargando...</div>
+}
