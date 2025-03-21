@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { toast } from "sonner";
-import type { FetcherWithComponents } from "react-router";
+import {useEffect} from "react";
+import {toast} from "sonner";
+import type {FetcherWithComponents} from "react-router";
 
 interface FetcherData {
     result?: {

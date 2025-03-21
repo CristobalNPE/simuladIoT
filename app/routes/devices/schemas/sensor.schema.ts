@@ -20,6 +20,7 @@ export const SensorSchema = z.object({
 export const SensorStatusSchema = z.object({
     isSending: z.boolean(),
     isVariable: z.boolean(),
+    intervalTime: z.number()
 });
 
 export const CreateSensorSchema = z.object({

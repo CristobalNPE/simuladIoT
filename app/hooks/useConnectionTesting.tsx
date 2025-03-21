@@ -1,4 +1,3 @@
-import type {ConnectionConfig, MqttConnection, RestConnection} from "~/types/connection.types";
 import mqtt from "mqtt";
 import {Badge} from "~/components/ui/badge";
 import {toast} from "sonner";
@@ -7,7 +6,8 @@ import {
     type ConnectionSettings,
     type HttpConnectionSettings,
     isHttpConnectionSettings,
-    isMqttConnectionSettings, type MqttConnectionSettings
+    isMqttConnectionSettings,
+    type MqttConnectionSettings
 } from "~/routes/settings/schemas/connection.schema";
 
 async function testHttpConnection(settings: HttpConnectionSettings): Promise<{

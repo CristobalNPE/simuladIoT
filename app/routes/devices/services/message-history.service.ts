@@ -1,5 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
-import type { Message } from '~/routes/devices/schemas/message.schema';
+import {v4 as uuidv4} from 'uuid';
+import type {Message} from '~/routes/devices/schemas/message.schema';
 
 const STORAGE_KEY = 'sensor_message_history';
 

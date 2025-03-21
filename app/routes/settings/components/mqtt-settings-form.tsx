@@ -1,8 +1,4 @@
-import {
-    type HttpConnectionSettings,
-    HttpConnectionSettingsSchema,
-    type MqttConnectionSettings, MqttConnectionSettingsSchema
-} from "~/routes/settings/schemas/connection.schema";
+import {type MqttConnectionSettings, MqttConnectionSettingsSchema} from "~/routes/settings/schemas/connection.schema";
 import {href, useFetcher} from "react-router";
 import {getInputProps, useForm} from "@conform-to/react";
 import {getZodConstraint, parseWithZod} from "@conform-to/zod";

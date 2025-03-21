@@ -1,8 +1,9 @@
 import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
-import type {SensorDataSent} from "~/routes/devices/schemas/sensor-data.schema";
+import type {SensorDataSent, SentDataResult} from "~/routes/devices/schemas/sensor-data.schema";
 import {sendMqttMessage} from "~/services/mqtt.service";
 import {sensorService} from "~/routes/devices/services/sensor.service";
 import {addVarianceToPayload, generateSamplePayload} from "~/routes/devices/utils/payload.utils";
+import {messageHistoryService} from "~/routes/devices/services/message-history.service";
 
 
 interface AutoSendConfig {
@@ -33,16 +34,48 @@ export const sensorDataService = {
         sensorService.updateSensor(sensor);
     },
 
-    sendDeviceData(data: SensorDataSent): void {
-        if (data.sensorType === "ESP32") {
-            sendDataViaRest(data);
-        } else if (data.sensorType === "ZIGBEE") {
-            sendDataViaMqtt(data);
-        } else {
-            throw new Error(`Unsupported sensor type: ${data.sensorType}`);
+    async sendDeviceData(data: SensorDataSent): Promise<SentDataResult> {
+        try {
+            let result: SentDataResult;
+
+            if (data.sensorType === "ESP32") {
+                result = await sendDataViaRest(data);
+            } else if (data.sensorType === "ZIGBEE") {
+                result = await sendDataViaMqtt(data);
+            } else {
+                throw new Error(`Unsupported sensor type: ${data.sensorType}`);
+            }
+
+            const jsonData = JSON.parse(data.sensorData);
+
+            messageHistoryService.createMessageRecord(
+                data.sensorId,
+                data.apiKey,
+                Array.isArray(jsonData) ? jsonData : [jsonData],
+                result.status || (result.success ? 200 : 400),
+                result.message || (result.success ? "Data sent successfully" : "Failed to send data")
+            );
+
+            return result;
+        } catch (error) {
+            console.error("Failed to send data", error);
+
+            const errorMessage = error instanceof Error ? error.message : "Unknown error";
+            messageHistoryService.createMessageRecord(
+                data.sensorId,
+                data.apiKey,
+                [], // empty JSON data since we couldn't parse or send it
+                500,
+                `Error: ${errorMessage}`
+            );
+
+            return {
+                success: false,
+                payload: data.sensorData,
+                status: 500,
+                message: errorMessage
+            };
         }
-
-
     },
 
     startAutoSend(sensorId: string, intervalMs: number = 5000, useRealisticValues: boolean = false): boolean {
@@ -118,11 +151,24 @@ export const sensorDataService = {
         Object.keys(autoSendConfigs).forEach(sensorId => {
             this.stopAutoSend(sensorId);
         });
-    }
+    },
 
+
+
+    getMessageHistory(sensorId: string) {
+        return messageHistoryService.getMessageHistoryBySensorId(sensorId);
+    },
+
+    clearMessageHistory(sensorId: string) {
+        messageHistoryService.clearHistoryForSensor(sensorId);
+    },
+
+    clearAllMessageHistory() {
+        messageHistoryService.clearAllHistory();
+    }
 }
 
-async function sendDataViaRest(data: SensorDataSent): Promise<void> {
+async function sendDataViaRest(data: SensorDataSent): Promise<SentDataResult> {
     const {endpoint, domain, port, isLocal} = connectionStorageService.getHttpSettings();
 
     const sanitizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`
@@ -132,32 +178,67 @@ async function sendDataViaRest(data: SensorDataSent): Promise<void> {
         : `https://${domain}${sanitizedEndpoint}`
 
     try {
-        await fetch(connectionURL, {
+        const response = await fetch(connectionURL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: data.sensorData,
-        })
+        });
+
+        const responseText = await response.text();
+        let responseMessage;
+
+        try {
+            const jsonResponse = JSON.parse(responseText);
+            responseMessage = jsonResponse.message || responseText;
+        } catch {
+            responseMessage = responseText || (response.ok ? "Success" : "Error");
+        }
+
+        return {
+            success: response.ok,
+            payload: data.sensorData,
+            status: response.status,
+            message: responseMessage
+        };
     } catch (error) {
-        console.error("REST request failed", error)
+        console.error("REST request failed", error);
+        return {
+            success: false,
+            payload: data.sensorData,
+            status: 0,
+            message: error instanceof Error ? error.message : "Network error"
+        };
     }
 }
 
 
-async function sendDataViaMqtt(data: SensorDataSent): Promise<void> {
+async function sendDataViaMqtt(data: SensorDataSent): Promise<SentDataResult> {
+    const {broker, port, topic} = connectionStorageService.getMqttSettings();
+    const payload = data.sensorData;
 
-    const {broker, port, topic} = connectionStorageService.getMqttSettings()
-
-    const payload = data.sensorData
     try {
         await sendMqttMessage({
             broker,
             port,
             topic,
             payload
-        })
+        });
+
+        return {
+            success: true,
+            payload: data.sensorData,
+            status: 200,
+            message: "MQTT message sent successfully"
+        };
     } catch (error) {
-        console.error("MQTT send failed", error)
+        console.error("MQTT send failed", error);
+        return {
+            success: false,
+            payload: data.sensorData,
+            status: 0,
+            message: error instanceof Error ? error.message : "MQTT error"
+        };
     }
 }

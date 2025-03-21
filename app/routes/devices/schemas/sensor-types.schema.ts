@@ -1,5 +1,4 @@
 import {z} from 'zod';
-import {SensorTypeSchema} from "~/routes/devices/schemas/sensor.schema";
 
 export const sensorCategorySchema = z.enum([
     'temperature',

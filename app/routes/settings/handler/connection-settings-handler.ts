@@ -2,7 +2,7 @@ import {parseWithZod} from "@conform-to/zod";
 import {z} from "zod";
 import {data} from "react-router";
 
-type ApplyMethod<T> = (value: T) => Promise<void> | void;
+type ApplyMethod<T, R = any> = (value: T) => Promise<R> | R;
 
 
 export function createActionHandler<T>(

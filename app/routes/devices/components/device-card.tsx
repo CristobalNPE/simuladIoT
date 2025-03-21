@@ -1,4 +1,4 @@
-import type {Sensor, SensorStatus} from "~/routes/devices/schemas/sensor.schema";
+import type {Sensor} from "~/routes/devices/schemas/sensor.schema";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "~/components/ui/card"
 import {Button} from "~/components/ui/button"
 import {Badge} from "~/components/ui/badge"
@@ -9,6 +9,7 @@ import {PayloadTab} from "./payload-tab";
 import {SettingsTab} from "./settings-tab";
 import {UpdateSensorDialog} from "~/routes/devices/components/update-sensor-dialog";
 import {href, useFetcher} from "react-router";
+import {useSensor} from "~/routes/devices/context/sensor-context";
 
 
 export function DeviceCard({sensor, connectionStrings}: {
@@ -18,10 +19,8 @@ export function DeviceCard({sensor, connectionStrings}: {
 
     const fetcher = useFetcher({key: "delete-sensor"})
     const [tab, setTab] = useState("payload")
-    const [sensorStatus, setSensorStatus] = useState<SensorStatus>({
-        isVariable: false,
-        isSending: false
-    })
+
+    const {sensorStatus} = useSensor(sensor.id);
 
     return (
         <Card className="col-span-1 h-[30.5rem]">
@@ -80,8 +79,6 @@ export function DeviceCard({sensor, connectionStrings}: {
                         <SettingsTab
                             deviceId={sensor.id}
                             sendingTo={sensor.type === "ESP32" ? connectionStrings.http : connectionStrings.mqtt}
-                            sensorStatus={sensorStatus}
-                            setSensorStatus={setSensorStatus}
                         />
                     </TabsContent>
                 </Tabs>

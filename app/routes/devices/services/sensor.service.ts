@@ -1,6 +1,8 @@
 import {type Sensor, SensorSchema, type SensorType, type UpdateSensor} from "~/routes/devices/schemas/sensor.schema";
 import type {SensorCategory} from "~/routes/devices/schemas/sensor-types.schema";
 import {generateSamplePayload} from "~/routes/devices/utils/payload.utils";
+import {sensorDataService} from "~/routes/devices/services/sensor-data.service";
+import {messageHistoryService} from "~/routes/devices/services/message-history.service";
 
 
 export const DEFAULT_SENSOR_CATEGORY: SensorCategory = 'temperature';
@@ -123,6 +125,10 @@ export const sensorService = {
     deleteSensor(id: string) {
         const allSensors = this.getAllSensors();
         const initialLength = allSensors.length;
+        ///
+        sensorDataService.stopAutoSend(id);
+        messageHistoryService.clearHistoryForSensor(id);
+        ///
 
         const filteredSensors = allSensors.filter(sensor => sensor.id !== id);
 

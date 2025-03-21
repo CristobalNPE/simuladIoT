@@ -8,7 +8,12 @@ import {createActionHandler} from "~/routes/settings/handler/connection-settings
 import {MqttSettingsForm} from "~/routes/settings/components/mqtt-settings-form";
 import {SectionHeader} from "~/components/section-header";
 
-
+export function meta({}: Route.MetaArgs) {
+    return [
+        {title: "SimulaDIoT - Configuración"},
+        {name: "description", content: "Simula dispositivos IOT y envía datos a tu API"},
+    ];
+}
 const connectionSettingsHandlers = {
     "update-http-settings": createActionHandler(
         HttpConnectionSettingsSchema,

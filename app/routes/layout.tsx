@@ -12,6 +12,7 @@ import {sensorService} from "~/routes/devices/services/sensor.service";
 import type {Sensor} from "~/routes/devices/schemas/sensor.schema";
 import type {Route} from "./+types/layout";
 import {CreateSensorDialog} from "~/routes/devices/components/create-sensor-dialog";
+import {useSensorContext} from "~/routes/devices/context/sensor-context";
 
 
 export async function clientLoader({request}: Route.ClientLoaderArgs) {
@@ -94,40 +95,46 @@ function SidePanel({sensors}: { sensors: Sensor[] }) {
                         </CreateSensorDialog>
                     </div>
                 </div>
-                <DeviceList sensors={sensors}/>
+                {sensors.length > 0 ? <DeviceList sensorsList={sensors}/> : null}
             </CardContent>
         </Card>
 
     )
 }
 
-function DeviceList({sensors}: { sensors: Sensor[] }) {
+function DeviceList({sensorsList}: { sensorsList: Sensor[] }) {
 
+    const {getSensorStatus} = useSensorContext();
     return (
         <>
             <div className={"flex flex-col gap-2"}>
                 <p className={"text-sm font-semibold"}>Dispositivos</p>
 
-                <div className={" space-y-2"}>
-                    {sensors.map(sensor => (
-                        <NavLink
-                            to={`/${sensor.id}`}
-                            key={sensor.id}
-                            className={({isActive, isPending}) =>
-                                cn("items-center gap-4 p-2 px-3 text-sm rounded-md flex bg-secondary tracking-tighter",
-                                    isActive && "ring-1 ring-primary font-bold tracking-tighter")
-                            }
+                <div className={" space-y-2 "}>
+                    {sensorsList.map(sensor => {
+                        const sensorStatus = getSensorStatus(sensor.id);
+                        return (
+                            <NavLink
+                                to={`/${sensor.id}`}
+                                key={sensor.id}
+                                className={({isActive, isPending}) =>
+                                    cn("relative items-center gap-4 p-2 px-3 text-sm rounded-md flex w-full justify-between bg-secondary tracking-tighter",
+                                        isActive && "ring-1 ring-primary font-bold tracking-tighter")
+                                }
 
-                        >
-                            <div className={"flex gap-2 items-center text-nowrap overflow-hidden"}>
-                                {sensor.type === "ESP32" ? <Wifi size={16}/> : <Radio size={16}/>}
-                                {sensor.name}
-                            </div>
-                            <div>
-                                {/*    TODO: indicators for auto-send, realistic values, etc*/}
-                            </div>
-                        </NavLink>
-                    ))}
+                            >
+                                <div className={"flex gap-2 items-center text-nowrap overflow-hidden"}>
+                                    {sensor.type === "ESP32" ? <Wifi size={16}/> : <Radio size={16}/>}
+                                    {sensor.name}
+                                </div>
+                                <div>
+                                    {sensorStatus.isSending &&
+                                        <div className={"size-2 bg-green-600 rounded-full animate-pulse"}></div>
+                                    }
+                                </div>
+                            </NavLink>
+                        )
+                    })}
                 </div>
             </div>
 
@@ -143,11 +150,10 @@ function Header() {
                 <div className={"flex items-center gap-4 "}>
                     <AppLogo/>
                     <div>
-                        <h1 className={"text-lg font-semibold"}>SimulaDIoT <span className={"hidden sm:inline"}>- Simulador de Dispositivos IoT</span>
+                        <h1 className={"text-lg font-semibold"}>SimulaDIoT
                         </h1>
                         <p className={"text-xs text-muted-foreground hidden sm:block "}>
-                            Prueba tu API con dispositivos ESP32 y Zigbee simulados. Configura y envía datos a tu
-                            servidor.
+                            Envía datos a tu API desde dispositivos IoT simulados
                         </p>
                     </div>
                 </div>
@@ -170,7 +176,7 @@ function GithubLink() {
                     <a
                         href="https://github.com/CristobalNPE/iot-device-simulator" target="_blank"
                         rel="noreferrer">
-                        <Github size={20}/>
+                        <Github size={16}/>
                     </a>
                 </div>
 

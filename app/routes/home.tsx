@@ -10,10 +10,8 @@ import type {DeviceInfo, DeviceInfoWithTimestamp, DeviceType} from "~/types/devi
 import type {ConnectionConfig} from "~/types/connection.types";
 import {ExternalLink, Github} from "lucide-react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "~/components/ui/tooltip";
-import Logo from "~/assets/simuladiot-logo.svg"
-import LogoLight from "~/assets/simuladiot-logo-light.svg"
 import {AppLogo} from "~/components/app-logo";
-import { redirect } from "react-router";
+import {redirect} from "react-router";
 
 export function meta({}: Route.MetaArgs) {
     return [

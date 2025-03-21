@@ -1,8 +1,7 @@
-import type {Sensor, SensorStatus} from "~/routes/devices/schemas/sensor.schema";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "~/components/ui/card"
+import type {Sensor} from "~/routes/devices/schemas/sensor.schema";
 import {Button} from "~/components/ui/button"
 import {Badge} from "~/components/ui/badge"
-import {Activity, Edit, Radio, RefreshCw, Trash2, Wifi} from "lucide-react"
+import {Activity, Edit, RefreshCw, Trash2} from "lucide-react"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "~/components/ui/tabs"
 import {useState} from "react";
 import {PayloadTab} from "./payload-tab";
@@ -11,9 +10,10 @@ import {UpdateSensorDialog} from "~/routes/devices/components/update-sensor-dial
 import {href, useFetcher} from "react-router";
 import {MessagesTab} from "~/routes/devices/components/messages-tab";
 import type {Message} from "~/routes/devices/schemas/message.schema";
+import {useSensor} from "~/routes/devices/context/sensor-context";
 
 
-export function DeviceCardWithHistory({sensor,messages, connectionStrings}: {
+export function DeviceCardWithHistory({sensor, messages, connectionStrings}: {
     sensor: Sensor,
     messages: Message[],
     connectionStrings: { http: string, mqtt: string }
@@ -21,10 +21,7 @@ export function DeviceCardWithHistory({sensor,messages, connectionStrings}: {
 
     const fetcher = useFetcher({key: "delete-sensor"})
     const [tab, setTab] = useState("payload")
-    const [sensorStatus, setSensorStatus] = useState<SensorStatus>({
-        isVariable: false,
-        isSending: false
-    })
+    const {sensorStatus} = useSensor(sensor.id);
 
     return (
         <div className="col-span-1 h-[calc(100dvh - 1rem)]">
@@ -68,20 +65,18 @@ export function DeviceCardWithHistory({sensor,messages, connectionStrings}: {
                         <SettingsTab
                             deviceId={sensor.id}
                             sendingTo={sensor.type === "ESP32" ? connectionStrings.http : connectionStrings.mqtt}
-                            sensorStatus={sensorStatus}
-                            setSensorStatus={setSensorStatus}
                         />
                         <div className="flex justify-end gap-4">
 
                             <UpdateSensorDialog sensor={sensor}>
-                                <Button variant="outline" >
+                                <Button variant="outline">
                                     <Edit className="h-4 w-4"/>
                                     Editar dispositivo
                                 </Button>
                             </UpdateSensorDialog>
                             <fetcher.Form action={href("/devices")} method={"POST"}>
                                 <input type="hidden" name="sensorId" value={sensor.id}/>
-                                <Button type="submit" name={"intent"} value={"delete-sensor"} variant="destructive" >
+                                <Button type="submit" name={"intent"} value={"delete-sensor"} variant="destructive">
                                     <Trash2 className="h-4 w-4"/>
                                     Eliminar dispositivo
                                 </Button>
@@ -89,7 +84,7 @@ export function DeviceCardWithHistory({sensor,messages, connectionStrings}: {
                         </div>
                     </TabsContent>
                     <TabsContent value="messages" className="space-y-4 pt-4">
-                        <MessagesTab messages={messages}/>
+                        <MessagesTab sensorId={sensor.id} messages={messages}/>
                     </TabsContent>
                 </Tabs>
             </div>

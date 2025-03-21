@@ -8,7 +8,7 @@ export function ThemeSwitch({className}: { className?: string }) {
     return (
         <button
             type="button"
-            className={cn("cursor-pointer relative flex h-8 w-24 items-center justify-center rounded-full border", className)}
+            className={cn("cursor-pointer relative flex h-8 w-8 items-center justify-center rounded-full border", className)}
             onClick={() => setTheme(prev => prev === Theme.DARK ? Theme.LIGHT : Theme.DARK)}
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
         >
