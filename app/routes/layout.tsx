@@ -9,26 +9,19 @@ import {NavLink} from "~/components/link";
 import {cn} from "~/lib/utils";
 import {Button} from "~/components/ui/button";
 import {sensorService} from "~/routes/devices/services/sensor.service";
-import type {Sensor} from "~/routes/devices/schemas/sensor.schema";
+import type {Sensor, SensorStatus} from "~/routes/devices/schemas/sensor.schema";
 import type {Route} from "./+types/layout";
 import {CreateSensorDialog} from "~/routes/devices/components/create-sensor-dialog";
 import {useSensorContext} from "~/routes/devices/context/sensor-context";
 
 
 export async function clientLoader({request}: Route.ClientLoaderArgs) {
-
     const sensors = sensorService.getAllSensors();
-
-    return {
-        sensors
-    }
-
+    return {sensors}
 }
 
 export default function Layout({loaderData}: Route.ComponentProps) {
-
     const {sensors} = loaderData;
-
 
     return (
         <>
@@ -45,7 +38,6 @@ export default function Layout({loaderData}: Route.ComponentProps) {
 }
 
 function SidePanel({sensors}: { sensors: Sensor[] }) {
-
 
     const navigationLinks: NavigationLink[] = [
         {
@@ -98,7 +90,6 @@ function SidePanel({sensors}: { sensors: Sensor[] }) {
                 {sensors.length > 0 ? <DeviceList sensorsList={sensors}/> : null}
             </CardContent>
         </Card>
-
     )
 }
 
@@ -113,32 +104,36 @@ function DeviceList({sensorsList}: { sensorsList: Sensor[] }) {
                 <div className={" space-y-2 "}>
                     {sensorsList.map(sensor => {
                         const sensorStatus = getSensorStatus(sensor.id);
-                        return (
-                            <NavLink
-                                to={`/${sensor.id}`}
-                                key={sensor.id}
-                                className={({isActive, isPending}) =>
-                                    cn("relative items-center gap-4 p-2 px-3 text-sm rounded-md flex w-full justify-between bg-secondary tracking-tighter",
-                                        isActive && "ring-1 ring-primary font-bold tracking-tighter")
-                                }
-
-                            >
-                                <div className={"flex gap-2 items-center text-nowrap overflow-hidden"}>
-                                    {sensor.type === "ESP32" ? <Wifi size={16}/> : <Radio size={16}/>}
-                                    {sensor.name}
-                                </div>
-                                <div>
-                                    {sensorStatus.isSending &&
-                                        <div className={"size-2 bg-green-600 rounded-full animate-pulse"}></div>
-                                    }
-                                </div>
-                            </NavLink>
-                        )
+                        return <DeviceLink sensor={sensor} sensorStatus={sensorStatus}/>
                     })}
                 </div>
             </div>
-
         </>
+    )
+}
+
+function DeviceLink({sensor, sensorStatus}: { sensor: Sensor, sensorStatus: SensorStatus }) {
+
+    return (
+        <NavLink
+            to={`/${sensor.id}`}
+            key={sensor.id}
+            className={({isActive, isPending}) =>
+                cn("relative items-center gap-4 p-2 px-3 text-sm rounded-md flex w-full justify-between bg-secondary tracking-tighter",
+                    isActive && "font-bold tracking-tighter")
+            }
+
+        >
+            <div className={"flex gap-2 items-center text-nowrap overflow-hidden"}>
+                {sensor.type === "ESP32" ? <Wifi size={16}/> : <Radio size={16}/>}
+                {sensor.name}
+            </div>
+            <div>
+                {sensorStatus.isSending &&
+                    <div className={"size-2 bg-green-600 rounded-full animate-pulse"}></div>
+                }
+            </div>
+        </NavLink>
     )
 }
 
