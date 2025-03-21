@@ -2,7 +2,7 @@ import {type HttpConnectionSettings, HttpConnectionSettingsSchema} from "~/route
 import {href, useFetcher} from "react-router";
 import {getInputProps, useForm} from "@conform-to/react";
 import {getZodConstraint, parseWithZod} from "@conform-to/zod";
-import {useConnectionTesting} from "~/hooks/useConnectionTesting";
+import {useConnTesting} from "~/hooks/use-conn-testing";
 import {useSpinDelay} from "spin-delay";
 import {ErrorList, Field} from "~/components/forms";
 import {Button} from "~/components/ui/button";
@@ -10,7 +10,8 @@ import {Unplug} from "lucide-react";
 import {StatusButton} from "~/components/ui/status-button";
 import React from "react";
 import type {clientAction} from "~/routes/settings/settings";
-import {useFetcherSuccessToast} from "~/hooks/useFetcherSuccessToast";
+import {useSuccessToast} from "~/hooks/use-success-toast";
+import {toast} from "sonner";
 
 export function HttpSettingsForm({currentSettings}: { currentSettings: HttpConnectionSettings }) {
     const fetcher = useFetcher<typeof clientAction>(({key: "http-connection-settings"}))
@@ -33,7 +34,7 @@ export function HttpSettingsForm({currentSettings}: { currentSettings: HttpConne
         isTestingConnection,
         testConnection,
         ConnectionStatusBadge
-    } = useConnectionTesting();
+    } = useConnTesting();
 
 
     const isLocalDomain = fields.domain.value === 'localhost' || fields.domain.value === '127.0.0.1';
@@ -54,15 +55,22 @@ export function HttpSettingsForm({currentSettings}: { currentSettings: HttpConne
     })
 
     const handleTestConnection = () => {
-        testConnection({
-            domain: fields.domain.value,
-            endpoint: fields.endpoint.value,
-            port: fields.port.value,
-            isLocal: isLocalDomain,
-        } as HttpConnectionSettings);
+        try {
+            if(fields.domain.value && fields.endpoint.value && fields.port.value) {
+                testConnection({
+                    domain: fields.domain.value,
+                    endpoint: fields.endpoint.value,
+                    port: Number(fields.port.value),
+                    isLocal: isLocalDomain,
+                } as HttpConnectionSettings);
+            }
+        } catch (error) {
+            console.error("Error testing connection:", error);
+            toast.error("Error al probar la conexión. Por favor, revisa los datos ingresados.")
+        }
     }
 
-    useFetcherSuccessToast(fetcher, "Configuración HTTP guardada correctamente.")
+    useSuccessToast(fetcher, "Configuración HTTP guardada correctamente.")
 
     return (
         <>
@@ -87,7 +95,7 @@ export function HttpSettingsForm({currentSettings}: { currentSettings: HttpConne
                     <Field
                         labelProps={{children: "Port"}}
                         inputProps={{
-                            ...getInputProps(fields.port, {type: "text"}),
+                            ...getInputProps(fields.port, {type: "number"}),
                             autoComplete: "port",
                             placeholder: "8080"
 

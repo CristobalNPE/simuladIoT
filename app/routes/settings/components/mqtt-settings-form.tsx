@@ -2,7 +2,7 @@ import {type MqttConnectionSettings, MqttConnectionSettingsSchema} from "~/route
 import {href, useFetcher} from "react-router";
 import {getInputProps, useForm} from "@conform-to/react";
 import {getZodConstraint, parseWithZod} from "@conform-to/zod";
-import {useConnectionTesting} from "~/hooks/useConnectionTesting";
+import {useConnTesting} from "~/hooks/use-conn-testing";
 import {useSpinDelay} from "spin-delay";
 import {ErrorList, Field} from "~/components/forms";
 import {Button} from "~/components/ui/button";
@@ -10,7 +10,8 @@ import {Unplug} from "lucide-react";
 import {StatusButton} from "~/components/ui/status-button";
 import React from "react";
 import type {clientAction} from "~/routes/settings/settings";
-import {useFetcherSuccessToast} from "~/hooks/useFetcherSuccessToast";
+import {useSuccessToast} from "~/hooks/use-success-toast";
+import {toast} from "sonner";
 
 export function MqttSettingsForm({currentSettings}: { currentSettings: MqttConnectionSettings }) {
     const fetcher = useFetcher<typeof clientAction>(({key: "mqtt-connection-settings"}))
@@ -33,7 +34,7 @@ export function MqttSettingsForm({currentSettings}: { currentSettings: MqttConne
         isTestingConnection,
         testConnection,
         ConnectionStatusBadge
-    } = useConnectionTesting();
+    } = useConnTesting();
 
 
     const isLocalDomain = fields.broker.value === 'localhost' || fields.broker.value === '127.0.0.1';
@@ -54,18 +55,23 @@ export function MqttSettingsForm({currentSettings}: { currentSettings: MqttConne
     })
 
     const handleTestConnection = () => {
-        if(fields.broker.value && fields.topic.value && fields.port.value){
-            testConnection({
-                broker: fields.broker.value,
-                topic: fields.topic.value,
-                port: Number(fields.port.value),
-                isLocal: isLocalDomain,
-            } as MqttConnectionSettings);
+        try {
+            if (fields.broker.value && fields.topic.value && fields.port.value) {
+                testConnection({
+                    broker: fields.broker.value,
+                    topic: fields.topic.value,
+                    port: Number(fields.port.value),
+                    isLocal: isLocalDomain,
+                } as MqttConnectionSettings);
+            }
+        } catch (error) {
+            console.error("Error testing MQTT connection:", error);
+            toast.error("Error al probar la conexión. Por favor, revisa los datos ingresados.")
         }
 
     }
 
-    useFetcherSuccessToast(fetcher, "Configuración MQTT guardada correctamente.")
+    useSuccessToast(fetcher, "Configuración MQTT guardada correctamente.")
 
     return (
         <>
@@ -90,7 +96,7 @@ export function MqttSettingsForm({currentSettings}: { currentSettings: MqttConne
                     <Field
                         labelProps={{children: "Port"}}
                         inputProps={{
-                            ...getInputProps(fields.port, {type: "text"}),
+                            ...getInputProps(fields.port, {type: "number"}),
                             autoComplete: "port",
                             placeholder: "9001"
 
