@@ -8,7 +8,7 @@ interface FetcherData {
     };
 }
 
-export function useFetcherSuccessToast<T extends FetcherData>(
+export function useSuccessToast<T extends FetcherData>(
     fetcher: FetcherWithComponents<T>,
     successMessage: string
 
