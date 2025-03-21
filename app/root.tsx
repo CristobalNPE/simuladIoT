@@ -61,7 +61,7 @@ export function Document({children}: { children: React.ReactNode }) {
             <PreventFlashOnWrongTheme ssrTheme={Boolean(data.theme)}/>
             <Links/>
         </head>
-        <body className={"min-h-[100dvh] !bg-background"}>
+        <body className={"min-h-[100dvh] w-[100vw] overflow-x-hidden !bg-background"}>
         {children}
         <Toaster/>
         <ScrollRestoration/>

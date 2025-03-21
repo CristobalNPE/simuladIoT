@@ -3,14 +3,20 @@ import mqtt from "mqtt";
 import {Badge} from "~/components/ui/badge";
 import {toast} from "sonner";
 import {useState} from "react";
+import {
+    type ConnectionSettings,
+    type HttpConnectionSettings,
+    isHttpConnectionSettings,
+    isMqttConnectionSettings, type MqttConnectionSettings
+} from "~/routes/settings/schemas/connection.schema";
 
-async function testHttpConnection(config: RestConnection): Promise<{
+async function testHttpConnection(settings: HttpConnectionSettings): Promise<{
     success: boolean;
     status?: number;
     message: string
 }> {
     try {
-        const baseUrl = `http://${config.domain}:${config.port}`;
+        const baseUrl = `${settings.isLocal? 'http':'https'}://${settings.domain}:${settings.port}`;
 
         const response = await fetch(baseUrl, {
             method: "HEAD",
@@ -36,7 +42,7 @@ async function testHttpConnection(config: RestConnection): Promise<{
     }
 }
 
-async function testMqttConnection(config: MqttConnection): Promise<{ success: boolean; message: string }> {
+async function testMqttConnection(config: MqttConnectionSettings): Promise<{ success: boolean; message: string }> {
     return new Promise((resolve) => {
         try {
             const url = `mqtt://${config.broker}:${config.port}`;
@@ -90,18 +96,18 @@ export function useConnectionTesting() {
         message?: string;
     }>({});
 
-    const testConnection = async (config: ConnectionConfig) => {
+    const testConnection = async (settings: ConnectionSettings) => {
         setIsTestingConnection(true);
 
         try {
             let result;
 
-            if (config.connectionType === 'rest') {
-                result = await testHttpConnection(config as RestConnection);
+            if (isHttpConnectionSettings(settings)) {
+                result = await testHttpConnection(settings as HttpConnectionSettings);
                 setHttpConnectionResult(result);
                 setMqttConnectionResult({});
-            } else if (config.connectionType === 'mqtt') {
-                result = await testMqttConnection(config as MqttConnection);
+            } else if (isMqttConnectionSettings(settings)) {
+                result = await testMqttConnection(settings as MqttConnectionSettings);
                 setMqttConnectionResult(result);
                 setHttpConnectionResult({});
             } else {
@@ -109,7 +115,7 @@ export function useConnectionTesting() {
             }
 
             if (result.success) {
-                toast.success("Conexión activa y disponible para solicitudes.")
+                toast.success(`Conexión activa y disponible para solicitudes.`)
             } else {
                 toast.error(result.message)
             }

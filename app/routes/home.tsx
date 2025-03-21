@@ -13,12 +13,19 @@ import {Tooltip, TooltipContent, TooltipTrigger} from "~/components/ui/tooltip";
 import Logo from "~/assets/simuladiot-logo.svg"
 import LogoLight from "~/assets/simuladiot-logo-light.svg"
 import {AppLogo} from "~/components/app-logo";
+import { redirect } from "react-router";
 
 export function meta({}: Route.MetaArgs) {
     return [
         {title: "SimulaDIoT - Simulador Dispositivos de IOT"},
         {name: "description", content: "Simula dispositivos IOT y envía datos a tu API"},
     ];
+}
+
+export async function clientLoader({request}: Route.ClientLoaderArgs) {
+
+    return redirect("/settings")
+
 }
 
 export default function Home() {

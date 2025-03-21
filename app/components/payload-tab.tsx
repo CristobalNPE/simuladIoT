@@ -5,13 +5,12 @@ import {AlertCircle} from "lucide-react";
 import {formatJSONMessage} from "~/utils/format.utils";
 
 interface PayloadTabProps {
-    disabled: boolean
     deviceId: string
     customPayload: string
     setCustomPayload: (value: string) => void
 }
 
-export function PayloadTab({disabled, deviceId, customPayload, setCustomPayload}: PayloadTabProps) {
+export function PayloadTab({ deviceId, customPayload, setCustomPayload}: PayloadTabProps) {
     const [editingValue, setEditingValue] = useState(customPayload)
     const [isValid, setIsValid] = useState(true)
 
