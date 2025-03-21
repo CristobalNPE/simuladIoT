@@ -56,6 +56,8 @@ export const sensorDataService = {
                 result.message || (result.success ? "Data sent successfully" : "Failed to send data")
             );
 
+
+
             return result;
         } catch (error) {
             console.error("Failed to send data", error);
