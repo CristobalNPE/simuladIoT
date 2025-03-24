@@ -104,7 +104,7 @@ function DeviceList({sensorsList}: { sensorsList: Sensor[] }) {
                 <div className={" space-y-2 "}>
                     {sensorsList.map(sensor => {
                         const sensorStatus = getSensorStatus(sensor.id);
-                        return <DeviceLink sensor={sensor} sensorStatus={sensorStatus}/>
+                        return <DeviceLink key={sensor.id} sensor={sensor} sensorStatus={sensorStatus}/>
                     })}
                 </div>
             </div>
