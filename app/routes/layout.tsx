@@ -1,9 +1,9 @@
 import {Card, CardContent, CardHeader, CardTitle} from "~/components/ui/card";
 import {AppLogo} from "~/components/app-logo";
 import {ThemeSwitch} from "~/components/theme-switch";
-import React from "react";
+import React, {useEffect, useState } from "react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "~/components/ui/tooltip";
-import {ExternalLink, Github, Radio, Wifi} from "lucide-react";
+import {ExternalLink, Github, Loader2, Radio, Wifi} from "lucide-react";
 import {Outlet} from "react-router";
 import {NavLink} from "~/components/link";
 import {cn} from "~/lib/utils";
@@ -183,7 +183,48 @@ function GithubLink() {
         </Tooltip>
     )
 }
+export function HydrateFallback(){
+    const [progress, setProgress] = useState(0)
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setProgress((prevProgress) => {
+                if (prevProgress >= 100) {
+                    return 100
+                }
+                const increment = Math.max(1, 10 * (1 - prevProgress / 100))
+                return Math.min(prevProgress + increment, 99)
+            })
+        }, 100)
+
+        return () => clearTimeout(timer)
+    }, [progress])
+
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
+            <div className="w-full max-w-md space-y-8">
+                <div className="flex items-center justify-center">
+                    <AppLogo/>
+                </div>
+                <div className="flex justify-center">
+                    <div className="relative h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-primary transition-all duration-300 ease-out rounded-full"
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center">Cargando aplicación</p>
+                </div>
+            </div>
+        </div>
+    )
+}
 type NavigationLink = {
     name: string;
     to: string;
