@@ -82,7 +82,7 @@ export function SettingsTab({
                 </div>
                 <p className="text-xs text-muted-foreground">
                     Si está activado, los valores variarán ligeramente con cada envío automático para simular el
-                    comportamiento real un sensor.
+                    comportamiento real de un sensor.
                 </p>
             </div>
 
