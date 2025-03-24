@@ -8,6 +8,8 @@ import React from "react";
 import {TooltipProvider} from "~/components/ui/tooltip";
 import {Toaster} from "sonner";
 import {SensorProvider} from "./routes/devices/context/sensor-context";
+import {z} from "zod";
+import {configureZodErrorMap} from "~/config/zod-config";
 
 export const links: Route.LinksFunction = () => [
     {rel: "preconnect", href: "https://fonts.googleapis.com"},
@@ -71,6 +73,7 @@ export function Document({children}: { children: React.ReactNode }) {
     );
 }
 
+configureZodErrorMap();
 
 // export function ErrorBoundary({error}: Route.ErrorBoundaryProps) {
 //     let message = "Oops!";
