@@ -11,7 +11,7 @@ export const SensorSchema = z.object({
     id: z.string(),
     name: z.string(),
     type: SensorTypeSchema,
-    measurementsCount: z.number().min(1, "Min. 1"),
+    measurementsCount: z.number().min(1, "Min. 1").max(20, "Max. 20"),
     category: sensorCategorySchema,
     apiKey: z.string(),
     payload: sensorPayloadSchema,
@@ -33,7 +33,7 @@ export const CreateSensorSchema = z.object({
 export const UpdateSensorSchema = z.object({
     id: z.string(),
     name: z.string(),
-    measurementsCount: z.number().min(1, "Min. 1"),
+    measurementsCount: z.number().min(1, "Min. 1").max(20, "Max. 20"),
     category: sensorCategorySchema,
     sensorType: SensorTypeSchema,
     apiKey: z.string(),
