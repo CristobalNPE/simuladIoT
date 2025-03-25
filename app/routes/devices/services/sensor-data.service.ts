@@ -29,7 +29,7 @@ export const sensorDataService = {
             console.error(`Sensor not found with id ${id}`)
             return;
         }
-        sensor.payload = generateSamplePayload(sensor.category, sensor.apiKey);
+        sensor.payload = generateSamplePayload(sensor.category, sensor.apiKey, sensor.measurementsCount);
 
         sensorService.updateSensor(sensor);
     },
@@ -55,7 +55,6 @@ export const sensorDataService = {
                 result.status || (result.success ? 200 : 400),
                 result.message || (result.success ? "Data sent successfully" : "Failed to send data")
             );
-
 
 
             return result;
@@ -94,7 +93,7 @@ export const sensorDataService = {
             let payload = sensor.payload
 
             if (useRealisticValues) {
-                payload = addVarianceToPayload(sensor.payload, sensor.category);
+                payload = addVarianceToPayload(sensor.payload, sensor.category); //TODO: WRONG
             }
 
             this.sendDeviceData({
@@ -154,7 +153,6 @@ export const sensorDataService = {
             this.stopAutoSend(sensorId);
         });
     },
-
 
 
     getMessageHistory(sensorId: string) {

@@ -37,6 +37,7 @@ export function UpdateSensorDialog({sensor, children}: UpdateSensorDialogProps) 
             name: sensor.name,
             apiKey: sensor.apiKey,
             sensorType: sensor.type,
+            measurementsCount: sensor.measurementsCount,
             category: sensor.category
         },
         lastResult: !isPending ? fetcher.data?.result : null,
@@ -68,7 +69,7 @@ export function UpdateSensorDialog({sensor, children}: UpdateSensorDialogProps) 
                 >
                     <div className={"mb-6"}>
                         <Field
-                            labelProps={{children: "Nombre "}}
+                            labelProps={{children: "Nombre"}}
                             inputProps={{
                                 ...getInputProps(fields.name, {type: "text"}),
                                 autoComplete: "device-name",
@@ -85,16 +86,27 @@ export function UpdateSensorDialog({sensor, children}: UpdateSensorDialogProps) 
                                 autoFocus: true,
                                 onFocus: (e) => e.target.select()
                             }}
-                            errors={fields.name.errors}
+                            errors={fields.apiKey.errors}
                         />
-                        <div className={""}>
-                            <Label htmlFor={fields.category.id} className=" mb-1">
-                                Categoría
-                            </Label>
-                            <SelectField
-                                meta={fields.category}
-                                items={getSensorCategories()}
-                                placeholder={"Seleccione una categoría"}
+                        <div className={"grid grid-cols-3 gap-4"}>
+                            <div className={"col-span-2"}>
+                                <Label htmlFor={fields.category.id} className=" mb-1">
+                                    Categoría
+                                </Label>
+                                <SelectField
+                                    meta={fields.category}
+                                    items={getSensorCategories()}
+                                    placeholder={"Seleccione una categoría"}
+                                />
+                            </div>
+                            <Field
+                                help={"Cantidad de mediciones enviadas en un mismo payload"}
+                                labelProps={{children: "Mediciones"}}
+                                inputProps={{
+                                    ...getInputProps(fields.measurementsCount, {type: "number"}),
+                                    autoComplete: "device-measurements-count",
+                                }}
+                                errors={fields.measurementsCount.errors}
                             />
                         </div>
                         <input type="hidden" name="sensorType" value={sensor.type}/>

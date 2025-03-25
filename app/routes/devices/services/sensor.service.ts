@@ -12,6 +12,8 @@ const generateDeviceName = (sensorType: SensorType, sensorId: string) => {
     return `Sensor ${sensorType === "ESP32" ? "ESP32" : "Zigbee"}-[${sensorId.slice(-4)}]`
 }
 
+
+const DEFAULT_MEASUREMENTS_COUNT = 1;
 export const sensorService = {
 
     createNewSensor({sensorType, apiKey, category}: {
@@ -21,15 +23,16 @@ export const sensorService = {
     }): void {
 
         const sensorId = Date.now().toString();
-        const sensorPayload = generateSamplePayload(category, apiKey);
+        let payload = generateSamplePayload(category, apiKey, DEFAULT_MEASUREMENTS_COUNT);
 
         const newSensor: Sensor = {
             id: sensorId,
             name: generateDeviceName(sensorType, sensorId),
             type: sensorType,
+            measurementsCount: DEFAULT_MEASUREMENTS_COUNT,
             category,
             apiKey,
-            payload: sensorPayload,
+            payload,
             createdAt: new Date().toISOString()
         }
 
@@ -105,12 +108,13 @@ export const sensorService = {
             return;
         }
 
-        const updatedPayload = generateSamplePayload(updatedSensor.category, updatedSensor.apiKey);
+        const updatedPayload = generateSamplePayload(updatedSensor.category, updatedSensor.apiKey, updatedSensor.measurementsCount);
 
         const newSensor = {
             ...sensorToUpdate,
             name: updatedSensor.name,
             category: updatedSensor.category,
+            measurementsCount: updatedSensor.measurementsCount,
             type: updatedSensor.sensorType,
             apiKey: updatedSensor.apiKey,
             payload: updatedPayload

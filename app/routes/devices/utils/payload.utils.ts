@@ -46,14 +46,30 @@ export function generateSampleData<T extends SensorCategory>(category: T): Senso
 }
 
 
-export function generateSamplePayload(category: SensorCategory, apiKey: string): SensorPayload {
+export function generateBasePayload(category: SensorCategory, apiKey: string, measurementsCount: number): SensorPayload {
+
     const sampleData = generateSampleData(category)
+
+    const allSampleData = [];
+    for (let i = 0; i < measurementsCount; i++) {
+        allSampleData.push(sampleData);
+    }
+
 
     return {
         api_key: apiKey,
-        json_data: [sampleData],
+        json_data: allSampleData,
     }
 }
+
+export function generateSamplePayload(category: SensorCategory, apiKey: string, measurementsCount: number): SensorPayload {
+
+    const baseSensorPayload = generateBasePayload(category, apiKey, measurementsCount);
+
+    return addVarianceToPayload(baseSensorPayload, category);
+
+}
+
 
 export function addVarianceToPayload(payload: SensorPayload, category: SensorCategory): SensorPayload {
 
