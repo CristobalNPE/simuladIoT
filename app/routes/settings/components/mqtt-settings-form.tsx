@@ -13,6 +13,7 @@ import type {clientAction} from "~/routes/settings/settings";
 import {useSuccessToast} from "~/hooks/use-success-toast";
 import {toast} from "sonner";
 
+
 export function MqttSettingsForm({currentSettings}: { currentSettings: MqttConnectionSettings }) {
     const fetcher = useFetcher<typeof clientAction>(({key: "mqtt-connection-settings"}))
     const isPending = fetcher.state !== "idle"
@@ -29,6 +30,7 @@ export function MqttSettingsForm({currentSettings}: { currentSettings: MqttConne
         },
         shouldRevalidate: "onBlur",
     })
+
 
     const {
         isTestingConnection,
@@ -94,7 +96,8 @@ export function MqttSettingsForm({currentSettings}: { currentSettings: MqttConne
                         errors={fields.broker.errors}
                     />
                     <Field
-                        labelProps={{children: "Port"}}
+                        help={"Puerto para conexión WebSocket del broker. No TCP"}
+                        labelProps={{children: "Port (solo WS)"}}
                         inputProps={{
                             ...getInputProps(fields.port, {type: "number"}),
                             autoComplete: "port",
