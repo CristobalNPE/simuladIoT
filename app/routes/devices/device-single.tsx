@@ -1,7 +1,7 @@
 import type {Route} from "./+types/device-single";
 import {sensorService} from "~/routes/devices/services/sensor.service";
 import {SectionHeader} from "~/components/section-header";
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {isRouteErrorResponse, redirect} from "react-router";
 import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
 import {DeviceCardWithHistory} from "~/routes/devices/components/device-card-full";
@@ -47,15 +47,21 @@ export default function DeviceSingle({loaderData}: Route.ComponentProps) {
 
     const [messages, setMessages] = useState<Message[]>([]);
 
-    const refreshMessages = () => {
-        setMessages(messageHistoryService.getMessageHistoryBySensorId(sensor.id));
-    }
+    const refreshMessages = useCallback(() => {
+        const newMessages = messageHistoryService.getMessageHistoryBySensorId(sensor.id);
+        setMessages(prevMessages => {
+            if (JSON.stringify(newMessages) !== JSON.stringify(prevMessages)) {
+                return newMessages;
+            }
+            return prevMessages;
+        });
+    }, [sensor.id]);
 
     useEffect(() => {
         refreshMessages();
         const intervalId = setInterval(refreshMessages, 1000);
         return () => clearInterval(intervalId);
-    }, [sensor.id]);
+    }, [sensor.id, refreshMessages]);
 
 
     return (
