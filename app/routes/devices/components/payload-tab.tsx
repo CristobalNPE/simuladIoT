@@ -53,7 +53,7 @@ export function PayloadTab({sensorId, sensorType, apiKey, payload}: PayloadTabPr
                 <input type={"hidden"} name={"apiKey"} value={apiKey}/>
                 <ErrorList errors={form.errors} id={form.errorId}/>
             </fetcher.Form>
-            <div className={"flex gap-2 justify-between"}>
+            <div className={"flex gap-2 justify-between "}>
                 <StatusButton
                     variant={"outline"}
                     name={"intent"}

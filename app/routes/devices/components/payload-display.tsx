@@ -43,7 +43,7 @@ export function PayloadDisplay({payload, sensorId}: { payload: SensorPayload, se
         <Dialog>
             <DialogTrigger asChild>
                 <ScrollArea
-                    className={"h-[200px] w-full bg-secondary rounded-md shadow-sm border hover:border-primary/50 select-none p-1 relative group transition-all duration-150"}>
+                    className={"h-[240px] mb-6 bg-green-300 w-full bg-secondary rounded-md shadow-sm border hover:border-primary/50 select-none p-1 relative group transition-all duration-150"}>
                     <pre className={"tracking-tight text-sm  hover:cursor-pointer text-left"}>
                         {JSON.stringify(payload, null, 2)}
                     </pre>
@@ -60,22 +60,23 @@ export function PayloadDisplay({payload, sensorId}: { payload: SensorPayload, se
                     </DialogDescription>
                 </DialogHeader>
 
-               <fetcher.Form
-                   action={href("/devices")}
-                   method={"POST"}
-                   {...getFormProps(form)}
-               >
-                   <TextareaField
-                       errors={fields.sensorData.errors}
-                       labelProps={{children: ""}}
-                       textareaProps={{
-                           className: "font-mono text-sm h-[400px]",
-                           ...getTextareaProps(fields.sensorData),
-                       }}
-                   />
-                   <input type={"hidden"} name={"sensorId"} value={sensorId}/>
-                   <ErrorList errors={form.errors} id={form.errorId}/>
-               </fetcher.Form>
+                <fetcher.Form
+                    action={href("/devices")}
+                    method={"POST"}
+                    {...getFormProps(form)}
+
+                >
+                    <TextareaField
+                        errors={fields.sensorData.errors}
+                        labelProps={{children: ""}}
+                        textareaProps={{
+                            className: "font-mono text-sm h-[400px]",
+                            ...getTextareaProps(fields.sensorData),
+                        }}
+                    />
+                    <input type={"hidden"} name={"sensorId"} value={sensorId}/>
+                    <ErrorList errors={form.errors} id={form.errorId}/>
+                </fetcher.Form>
                 <DialogFooter>
                     <StatusButton
                         name={"intent"}
