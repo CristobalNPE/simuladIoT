@@ -10,6 +10,7 @@ export default [
         route("devices", "routes/devices/devices.tsx"),
         route(":deviceId", "routes/devices/device-single.tsx"),
         route("settings", "routes/settings/settings.tsx"),
+        route("send-to-broker", "routes/send-message-to-broker.tsx"),
     ])
 
 ] satisfies RouteConfig;
