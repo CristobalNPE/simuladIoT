@@ -16,5 +16,25 @@ export const sendDataResultSchema = z.object({
     updatedPayload: z.string().optional()
 })
 
+export const sensorModifyPayloadSchema = z.object({
+    sensorId: z.string(),
+    sensorData: z.string()
+        .refine(
+            (value) => {
+                try {
+                    JSON.parse(value);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            },
+            {
+                message: "El JSON no es válido. Por favor, corrígelo antes de enviar los datos."
+            }
+        )
+
+})
+
+export type SensorModifyPayload = z.infer<typeof sensorModifyPayloadSchema>;
 export type SensorDataSent = z.infer<typeof sensorDataSentSchema>;
 export type SentDataResult = z.infer<typeof sendDataResultSchema>;

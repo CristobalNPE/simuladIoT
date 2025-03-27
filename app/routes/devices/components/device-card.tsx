@@ -19,7 +19,6 @@ export function DeviceCard({sensor, connectionStrings}: {
 
     const fetcher = useFetcher({key: "delete-sensor"})
     const [tab, setTab] = useState("payload")
-
     const {sensorStatus} = useSensor(sensor.id);
 
     return (
@@ -68,7 +67,7 @@ export function DeviceCard({sensor, connectionStrings}: {
                     </TabsList>
                     <TabsContent value="payload" className="space-y-4 pt-4">
                         <PayloadTab
-                            key={sensor.id}
+                            key={`${sensor.id}-${JSON.stringify(sensor.payload)}`}
                             sensorType={sensor.type}
                             sensorId={sensor.id}
                             apiKey={sensor.apiKey}

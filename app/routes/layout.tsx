@@ -1,7 +1,7 @@
 import {Card, CardContent, CardHeader, CardTitle} from "~/components/ui/card";
 import {AppLogo} from "~/components/app-logo";
 import {ThemeSwitch} from "~/components/theme-switch";
-import React, {useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "~/components/ui/tooltip";
 import {ExternalLink, Github, Loader2, Radio, Wifi} from "lucide-react";
 import {Outlet} from "react-router";

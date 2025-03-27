@@ -1,8 +1,9 @@
 import {type Sensor, SensorSchema, type SensorType, type UpdateSensor} from "~/routes/devices/schemas/sensor.schema";
-import type {SensorCategory} from "~/routes/devices/schemas/sensor-types.schema";
+import {type SensorCategory} from "~/routes/devices/schemas/sensor-types.schema";
 import {generateSamplePayload} from "~/routes/devices/utils/payload.utils";
 import {sensorDataService} from "~/routes/devices/services/sensor-data.service";
 import {messageHistoryService} from "~/routes/devices/services/message-history.service";
+import type {SensorModifyPayload} from "~/routes/devices/schemas/sensor-data.schema";
 
 
 export const DEFAULT_SENSOR_CATEGORY: SensorCategory = 'temperature';
@@ -124,6 +125,29 @@ export const sensorService = {
 
         const allSensorsString = JSON.stringify([...allSensors, newSensor], null, 2);
         localStorage.setItem(SENSORS_KEY, allSensorsString);
+    },
+
+    updateSensorPayload(modifyPayload: SensorModifyPayload): void {
+        const sensorToUpdate = this.getSensorById(modifyPayload.sensorId);
+        if (!sensorToUpdate) {
+            console.error(`Sensor with ID ${modifyPayload.sensorId} not found`);
+            return;
+        }
+
+        try {
+            const parsedPayload = JSON.parse(modifyPayload.sensorData);
+
+            const newSensor = {
+                ...sensorToUpdate,
+                payload: parsedPayload
+            };
+
+            const allSensors = this.getAllSensors().filter(sensor => sensor.id !== modifyPayload.sensorId);
+            const allSensorsString = JSON.stringify([...allSensors, newSensor], null, 2);
+            localStorage.setItem(SENSORS_KEY, allSensorsString);
+        } catch (error) {
+            console.error(`Error updating sensor payload:`, error);
+        }
     },
 
     deleteSensor(id: string) {

@@ -8,48 +8,47 @@ export const sensorCategorySchema = z.enum([
     'custom'
 ]);
 
-export const temperatureSensorDataSchema = z.object({
-    temperature: z.number(),
-    humidity: z.number(),
+const baseSensorDataSchema = z.object({
     timestamp: z.string()
+}).catchall(z.any()); // allow any additional fields
+
+export const temperatureSensorDataSchema = baseSensorDataSchema.extend({
+    temperature: z.number().optional(),
+    humidity: z.number().optional(),
 });
 
-export const pressureSensorDataSchema = z.object({
-    pressure: z.number(),
-    altitude: z.number(),
-    timestamp: z.string()
+export const pressureSensorDataSchema = baseSensorDataSchema.extend({
+    pressure: z.number().optional(),
+    altitude: z.number().optional(),
 });
 
-export const motionSensorDataSchema = z.object({
-    motion_detected: z.boolean(),
-    distance: z.number(),
-    timestamp: z.string()
+export const motionSensorDataSchema = baseSensorDataSchema.extend({
+    motion_detected: z.boolean().optional(),
+    distance: z.number().optional(),
 });
 
-export const voltageSensorDataSchema = z.object({
-    voltage: z.number(),
-    current: z.number(),
-    timestamp: z.string()
+export const voltageSensorDataSchema = baseSensorDataSchema.extend({
+    voltage: z.number().optional(),
+    current: z.number().optional(),
 });
 
-export const customSensorDataSchema = z.object({
-    value: z.number(),
-    timestamp: z.string()
-}).catchall(z.any());
+export const customSensorDataSchema = baseSensorDataSchema.extend({
+    value: z.number().optional(),
+});
 
-export const sensorDataSchema = z.union([
-    temperatureSensorDataSchema,
-    pressureSensorDataSchema,
-    motionSensorDataSchema,
-    voltageSensorDataSchema,
-    customSensorDataSchema
-]);
+export const sensorDataSchema = z.object({}).catchall(z.any()).refine(
+    data => {
+        return typeof data.timestamp === 'string';
+    },
+    {
+        message: "Los datos del sensor deben incluir un campo 'timestamp'"
+    }
+);
 
 export const sensorPayloadSchema = z.object({
     api_key: z.string(),
     json_data: z.array(sensorDataSchema)
 });
-
 
 export const sensorDataTypeMapSchema = z.object({
     temperature: temperatureSensorDataSchema,
@@ -58,7 +57,6 @@ export const sensorDataTypeMapSchema = z.object({
     voltage: voltageSensorDataSchema,
     custom: customSensorDataSchema
 });
-
 
 export type SensorCategory = z.infer<typeof sensorCategorySchema>;
 export type TemperatureSensorData = z.infer<typeof temperatureSensorDataSchema>;
@@ -69,5 +67,3 @@ export type CustomSensorData = z.infer<typeof customSensorDataSchema>;
 export type SensorData = z.infer<typeof sensorDataSchema>;
 export type SensorPayload = z.infer<typeof sensorPayloadSchema>;
 export type SensorDataTypeMap = z.infer<typeof sensorDataTypeMapSchema>;
-
-

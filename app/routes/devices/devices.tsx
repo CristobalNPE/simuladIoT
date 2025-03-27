@@ -5,7 +5,7 @@ import {createActionHandler} from "~/routes/settings/handler/connection-settings
 import {CreateSensorSchema, DeleteSensorSchema, UpdateSensorSchema} from "~/routes/devices/schemas/sensor.schema";
 import {Outlet, useSearchParams} from "react-router";
 import {DevicesGrid} from "~/routes/devices/components/devices-grid";
-import {sensorDataSentSchema} from "~/routes/devices/schemas/sensor-data.schema";
+import {sensorDataSentSchema, sensorModifyPayloadSchema} from "~/routes/devices/schemas/sensor-data.schema";
 import {sensorDataService} from "~/routes/devices/services/sensor-data.service";
 import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
 
@@ -33,6 +33,10 @@ const sensorHandlers = {
     "regenerate-device-payload": createActionHandler(
         sensorDataSentSchema,
         (value) => sensorDataService.regenerateSensorPayload(value.sensorId)
+    ),
+    "modify-device-payload": createActionHandler(
+        sensorModifyPayloadSchema,
+        (value) => sensorService.updateSensorPayload(value)
     ),
     "send-device-payload": createActionHandler(
         sensorDataSentSchema,

@@ -8,7 +8,6 @@ import React from "react";
 import {TooltipProvider} from "~/components/ui/tooltip";
 import {Toaster} from "sonner";
 import {SensorProvider} from "./routes/devices/context/sensor-context";
-import {z} from "zod";
 import {configureZodErrorMap} from "~/config/zod-config";
 
 export const links: Route.LinksFunction = () => [

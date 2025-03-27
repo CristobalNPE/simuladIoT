@@ -2,7 +2,7 @@ import type {Route} from "./+types/device-single";
 import {sensorService} from "~/routes/devices/services/sensor.service";
 import {SectionHeader} from "~/components/section-header";
 import React, {useCallback, useEffect, useState} from "react";
-import {isRouteErrorResponse, redirect} from "react-router";
+import {redirect} from "react-router";
 import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
 import {DeviceCardWithHistory} from "~/routes/devices/components/device-card-full";
 import {Badge} from "~/components/ui/badge";
@@ -76,6 +76,7 @@ export default function DeviceSingle({loaderData}: Route.ComponentProps) {
                 </Badge>
             </div>
             <DeviceCardWithHistory
+                key={`${sensor.id}-${JSON.stringify(sensor.payload)}`}
                 sensor={sensor}
                 messages={messages}
                 connectionStrings={connectionStrings}/>
