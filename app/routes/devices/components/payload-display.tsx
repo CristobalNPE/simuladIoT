@@ -43,7 +43,7 @@ export function PayloadDisplay({payload, sensorId}: { payload: SensorPayload, se
         <Dialog>
             <DialogTrigger asChild>
                 <ScrollArea
-                    className={"h-[240px] mb-6 bg-green-300 w-full bg-secondary rounded-md shadow-sm border hover:border-primary/50 select-none p-1 relative group transition-all duration-150"}>
+                    className={"h-[240px] mb-6 bg-green-300 w-full bg-secondary rounded-md shadow-sm border hover:border-primary/50 select-none p-1 py-3  relative group transition-all duration-150"}>
                     <pre className={"tracking-tight text-sm  hover:cursor-pointer text-left"}>
                         {JSON.stringify(payload, null, 2)}
                     </pre>
