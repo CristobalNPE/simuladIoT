@@ -13,14 +13,14 @@ import type {Route} from "./+types/layout";
 import {CreateSensorDialog} from "~/routes/devices/components/create-sensor-dialog";
 import {useSensorContext} from "~/routes/devices/context/sensor-context";
 import {sensorSessionService} from "~/routes/devices/services/sensor-session.server";
-import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
+import {connectionStorageServer} from "~/routes/settings/services/connection-storage.server";
 
 
 export async function loader({request}: Route.LoaderArgs) {
 
     const [sensors, connectionsConfigured] = await Promise.all([
         sensorSessionService.getAllSensors(request),
-        connectionStorageService.checkConnectionsExist(request)
+        connectionStorageServer.checkConnectionsExist(request)
     ]);
 
 

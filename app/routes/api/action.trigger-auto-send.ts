@@ -1,6 +1,6 @@
 import {sensorSessionService} from "~/routes/devices/services/sensor-session.server";
 import {data} from "react-router";
-import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
+import {connectionStorageServer} from "~/routes/settings/services/connection-storage.server";
 import {addVarianceToPayload} from "~/routes/devices/utils/payload.utils";
 import {sendDeviceData} from "~/routes/devices/services/message-sending.server";
 import type {Route} from "./+types/trigger-auto-send";
@@ -27,8 +27,8 @@ export async function action({request}: Route.ActionArgs) {
         }
 
         const connectionSettings = sensor.type === "ESP32"
-            ? await connectionStorageService.getHttpConnectionSettingsFromRequest(request)
-            : await connectionStorageService.getBrokerConnectionSettingsFromRequest(request);
+            ? await connectionStorageServer.getHttpConnectionSettingsFromRequest(request)
+            : await connectionStorageServer.getBrokerConnectionSettingsFromRequest(request);
 
         if (!connectionSettings) {
             console.error(`[AutoSend Action] Connection settings not found for sensor ${sensorId}.`);

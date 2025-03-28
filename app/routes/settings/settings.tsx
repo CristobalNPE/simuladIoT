@@ -1,7 +1,7 @@
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "~/components/ui/tabs";
 import React from "react";
 import {HttpSettingsForm} from "~/routes/settings/components/http-settings-form";
-import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
+import {connectionStorageServer} from "~/routes/settings/services/connection-storage.server";
 import type {Route} from "../../../.react-router/types/app/routes/settings/+types/settings";
 import {BrokerSettingsForm} from "~/routes/settings/components/broker-settings-form";
 import {SectionHeader} from "~/components/section-header";
@@ -22,11 +22,11 @@ export function meta({}: Route.MetaArgs) {
 const settingsActionHandlers: Record<string, RequestHandler> = {
     "update-broker-settings": createActionHandler(
         BrokerConnectionSettingsSchema,
-        connectionStorageService.storeBrokerConnectionSettings
+        connectionStorageServer.storeBrokerConnectionSettings
     ),
     "update-http-settings": createActionHandler(
         HttpConnectionSettingsSchema,
-        connectionStorageService.storeHttpConnectionSettings
+        connectionStorageServer.storeHttpConnectionSettings
     )
 }
 
@@ -57,8 +57,8 @@ export async function action({request}: Route.ActionArgs) {
 export async function loader({request}: Route.LoaderArgs) {
 
     const [brokerSettings, httpSettings] = await Promise.all([
-        connectionStorageService.getBrokerConnectionSettingsFromRequest(request),
-        connectionStorageService.getHttpConnectionSettingsFromRequest(request)
+        connectionStorageServer.getBrokerConnectionSettingsFromRequest(request),
+        connectionStorageServer.getHttpConnectionSettingsFromRequest(request)
     ])
 
     return {httpSettings, brokerSettings};

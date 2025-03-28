@@ -7,6 +7,7 @@ import {
 } from "~/routes/settings/schemas/connection.schema";
 import {createProducer} from "~/services/producer.factory";
 import type {TestConnectionResult} from "~/routes/api/types/connection-test.types";
+import type { Route } from "./+types/test-connection";
 
 
 export async function action({request}: Route.ActionArgs) {

@@ -9,7 +9,7 @@ import type {SensorType} from "~/routes/devices/schemas/sensor.schema";
 import {sensorDataSentSchema} from "~/routes/devices/schemas/sensor-data.schema";
 import type {SensorPayload} from "../schemas/sensor-types.schema";
 import {PayloadDisplay} from "./payload-display";
-import type {action} from "~/routes/send-message-to-broker";
+import type {action} from "~/routes/api/action.send-message-to-broker";
 
 interface PayloadTabProps {
     sensorId: string

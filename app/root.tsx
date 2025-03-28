@@ -7,7 +7,7 @@ import React from "react";
 import {TooltipProvider} from "~/components/ui/tooltip";
 import {Toaster} from "sonner";
 import {SensorProvider} from "./routes/devices/context/sensor-context";
-import {configureZodErrorMap} from "~/config/zod-config";
+import {configureZodErrorMap} from "~/lib/zod";
 import {themeSessionResolver} from "~/services/session.server";
 
 export const links: Route.LinksFunction = () => [

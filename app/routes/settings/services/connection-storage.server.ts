@@ -23,7 +23,7 @@ const defaultBrokerSettings: BrokerConnectionSettings = {
 
 const BROKER_SETTINGS_KEY = "broker-settings";
 const HTTP_SETTINGS_KEY = "http-settings";
-export const connectionStorageService = {
+export const connectionStorageServer = {
 
     async getHttpConnectionSettingsFromRequest(request: Request): Promise<HttpConnectionSettings> {
         const session = await getSession(request.headers.get("Cookie"));

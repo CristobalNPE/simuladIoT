@@ -11,7 +11,7 @@ import {sensorDataSentSchema, sensorModifyPayloadSchema} from "~/routes/devices/
 import {sensorSessionService} from "~/routes/devices/services/sensor-session.server";
 import {z} from "zod";
 import {messageHistoryService} from "~/routes/devices/services/message-history.server";
-import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
+import {connectionStorageServer} from "~/routes/settings/services/connection-storage.server";
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -51,7 +51,7 @@ const sensorHandlers: Record<string, RequestHandler> = {
 
 export async function loader({request}: Route.LoaderArgs) {
     const sensors = await sensorSessionService.getAllSensors(request);
-    const connectionsConfigured = await connectionStorageService.checkConnectionsExist(request);
+    const connectionsConfigured = await connectionStorageServer.checkConnectionsExist(request);
 
     if (!connectionsConfigured) {
         throw redirect("/settings");

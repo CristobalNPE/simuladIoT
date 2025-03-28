@@ -1,17 +1,11 @@
-import type {Route} from "./+types/send-message-to-broker";
-import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
+import {connectionStorageServer} from "~/routes/settings/services/connection-storage.server";
 import type {SensorType} from "~/routes/devices/schemas/sensor.schema";
 import {sendDeviceData} from "~/routes/devices/services/message-sending.server";
 import {data} from "react-router";
-import {sensorSessionService} from "./devices/services/sensor-session.server";
+import {sensorSessionService} from "../devices/services/sensor-session.server";
 import {messageHistoryService} from "~/routes/devices/services/message-history.server";
+import type { Route } from "../+types/send-message-to-broker";
 
-
-interface ManualSendFormData {
-    payload: string;
-    sensorType: SensorType;
-    sensorId: string;
-}
 
 export async function action({request}: Route.ActionArgs) {
 
@@ -50,12 +44,12 @@ export async function action({request}: Route.ActionArgs) {
         let connectionSettings;
         switch (sensorType) {
             case "ESP32": {
-                connectionSettings = await connectionStorageService.getHttpConnectionSettingsFromRequest(request);
+                connectionSettings = await connectionStorageServer.getHttpConnectionSettingsFromRequest(request);
                 if (!connectionSettings) throw new Error("HTTP connection settings not found.");
                 break;
             }
             case "ZIGBEE": {
-                connectionSettings = await connectionStorageService.getBrokerConnectionSettingsFromRequest(request);
+                connectionSettings = await connectionStorageServer.getBrokerConnectionSettingsFromRequest(request);
                 if (!connectionSettings) throw new Error("Broker connection settings not found.");
                 break;
             }
