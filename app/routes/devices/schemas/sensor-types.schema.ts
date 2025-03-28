@@ -9,7 +9,7 @@ export const sensorCategorySchema = z.enum([
 ]);
 
 const baseSensorDataSchema = z.object({
-    timestamp: z.string()
+    datetime: z.number()
 }).catchall(z.any()); // allow any additional fields
 
 export const temperatureSensorDataSchema = baseSensorDataSchema.extend({
@@ -38,10 +38,10 @@ export const customSensorDataSchema = baseSensorDataSchema.extend({
 
 export const sensorDataSchema = z.object({}).catchall(z.any()).refine(
     data => {
-        return typeof data.timestamp === 'string';
+        return typeof data.datetime === 'number';
     },
     {
-        message: "Los datos del sensor deben incluir un campo 'timestamp'"
+        message: "Los datos del sensor deben incluir un campo 'datetime'"
     }
 );
 

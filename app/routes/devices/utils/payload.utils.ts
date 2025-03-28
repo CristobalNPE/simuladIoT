@@ -5,42 +5,45 @@ import type {
     SensorPayload
 } from "~/routes/devices/schemas/sensor-types.schema";
 
+const TIME_STAMP_FIELD_NAME = "datetime"
 export function generateSampleData<T extends SensorCategory>(category: T): SensorDataTypeMap[T] {
-    const timestamp = new Date().toISOString();
+    const datetime = Math.floor(Date.now() / 1000)
+
+
 
     switch (category) {
         case "temperature":
             return {
                 temperature: Number.parseFloat((Math.random() * 30 + 10).toFixed(1)),
                 humidity: Number.parseFloat((Math.random() * 50 + 30).toFixed(1)),
-                timestamp
+                [TIME_STAMP_FIELD_NAME]: datetime
             } as SensorDataTypeMap[T];
 
         case "pressure":
             return {
                 pressure: Number.parseFloat((Math.random() * 100 + 900).toFixed(1)),
                 altitude: Number.parseFloat((Math.random() * 100).toFixed(1)),
-                timestamp
+                [TIME_STAMP_FIELD_NAME]: datetime
             } as SensorDataTypeMap[T];
 
         case "motion":
             return {
                 motion_detected: Math.random() > 0.5,
                 distance: Number.parseFloat((Math.random() * 10).toFixed(2)),
-                timestamp
+                [TIME_STAMP_FIELD_NAME]: datetime
             } as SensorDataTypeMap[T];
 
         case "voltage":
             return {
                 voltage: Number.parseFloat((Math.random() * 5 + 1).toFixed(2)),
                 current: Number.parseFloat((Math.random() * 2).toFixed(2)),
-                timestamp
+                [TIME_STAMP_FIELD_NAME]: datetime
             } as SensorDataTypeMap[T];
 
         default:
             return {
                 value: Number.parseFloat((Math.random() * 100).toFixed(1)),
-                timestamp
+                [TIME_STAMP_FIELD_NAME]: datetime
             } as SensorDataTypeMap[T];
     }
 }
@@ -97,7 +100,7 @@ export function addVarianceToPayload(payload: SensorPayload, category: SensorCat
             // for numbers: add variance
             Object.keys(itemWithVariance).forEach(key => {
                 // @ts-ignore
-                if (typeof itemWithVariance[key] === 'number' && key !== 'timestamp') {
+                if (typeof itemWithVariance[key] === 'number' && key !== TIME_STAMP_FIELD_NAME) {
                     // @ts-ignore
                     itemWithVariance[key] = addVariance(itemWithVariance[key]);
                 }
