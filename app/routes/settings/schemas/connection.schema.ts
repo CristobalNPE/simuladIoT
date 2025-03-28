@@ -1,31 +1,35 @@
 import {z} from "zod";
+import {BrokerTypeSchema} from "~/types/broker.types";
 
-
-export const HttpConnectionSettingsSchema = z.object({
-    domain: z.string(),
-    port: z.coerce.number().optional(),
-    endpoint: z.string(),
-    isLocal: z.coerce.boolean()
+export const AuthConfigSchema = z.object({
+    username: z.string().min(1),
+    password: z.string().min(1)
 });
 
-export const MqttConnectionSettingsSchema = z.object({
-    broker: z.string(),
-    port: z.coerce.number(),
-    topic: z.string(),
-    isLocal: z.coerce.boolean()
+export type AuthConfig = z.infer<typeof AuthConfigSchema>;
+
+export const HttpConnectionSettingsSchema = z.object({
+    connectionString: z.string().min(1),
+});
+
+export const BrokerConnectionSettingsSchema = z.object({
+    connectionString: z.string().min(1), //todo; add validations?
+    broker: BrokerTypeSchema,
+    destination: z.string().min(1),
+    auth: AuthConfigSchema.optional()
 });
 
 
 export type HttpConnectionSettings = z.infer<typeof HttpConnectionSettingsSchema>
-export type MqttConnectionSettings = z.infer<typeof MqttConnectionSettingsSchema>
-export type ConnectionSettings = HttpConnectionSettings | MqttConnectionSettings
+export type BrokerConnectionSettings = z.infer<typeof BrokerConnectionSettingsSchema>
+export type ConnectionSettings = HttpConnectionSettings | BrokerConnectionSettings
 
 export function isHttpConnectionSettings(settings: ConnectionSettings): settings is HttpConnectionSettings {
     return 'domain' in settings && 'endpoint' in settings;
 }
 
-export function isMqttConnectionSettings(settings: ConnectionSettings): settings is MqttConnectionSettings {
-    return 'broker' in settings && 'topic' in settings;
+export function isBrokerConnectionSettings(settings: ConnectionSettings): settings is BrokerConnectionSettings {
+    return 'destination' in settings;
 }
 
 export function validateConnectionSettings(settings: unknown): ConnectionSettings {
@@ -33,7 +37,7 @@ export function validateConnectionSettings(settings: unknown): ConnectionSetting
         return HttpConnectionSettingsSchema.parse(settings);
     } catch (e) {
         try {
-            return MqttConnectionSettingsSchema.parse(settings);
+            return BrokerConnectionSettingsSchema.parse(settings);
         } catch (e2) {
             throw new Error("Invalid connection settings");
         }

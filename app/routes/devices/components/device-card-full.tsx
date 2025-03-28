@@ -13,10 +13,9 @@ import type {Message} from "~/routes/devices/schemas/message.schema";
 import {useSensor} from "~/routes/devices/context/sensor-context";
 
 
-export function DeviceCardWithHistory({sensor, messages, connectionStrings}: {
+export function DeviceCardWithHistory({sensor, messages}: {
     sensor: Sensor,
     messages: Message[],
-    connectionStrings: { http: string, mqtt: string }
 }) {
 
     const fetcher = useFetcher({key: "delete-sensor"})
@@ -64,7 +63,7 @@ export function DeviceCardWithHistory({sensor, messages, connectionStrings}: {
                     <TabsContent value="settings" className="space-y-4 pt-4">
                         <SettingsTab
                             deviceId={sensor.id}
-                            sendingTo={sensor.type === "ESP32" ? connectionStrings.http : connectionStrings.mqtt}
+                            sendingTo={"fk off"}
                         />
                         <div className="flex justify-end gap-4">
 

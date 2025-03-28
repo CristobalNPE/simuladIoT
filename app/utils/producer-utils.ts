@@ -19,7 +19,7 @@ export function deriveActiveMqHttpUrl(brokerConnectionString: string): string {
 
         // Construct the assumed HTTP URL
         const derivedUrl = `${DEFAULT_ACTIVEMQ_HTTP_SCHEME}://${hostname}:${DEFAULT_ACTIVEMQ_HTTP_PORT}`;
-        console.warn(`🟡 Automatically derived ActiveMQ HTTP URL as: ${derivedUrl}. This assumes defaults.`);
+        console.warn(`🟡 Automatically derived ActiveMQ HTTP URL as: ${derivedUrl}. Assuming defaults.`);
         return derivedUrl;
 
     } catch (parseError: any) {

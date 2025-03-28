@@ -1,13 +1,12 @@
 import type {Route} from "./+types/device-single";
-import {sensorService} from "~/routes/devices/services/sensor.service";
 import {SectionHeader} from "~/components/section-header";
 import React, {useCallback, useEffect, useState} from "react";
 import {redirect} from "react-router";
-import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
 import {DeviceCardWithHistory} from "~/routes/devices/components/device-card-full";
 import {Badge} from "~/components/ui/badge";
 import {messageHistoryService} from "~/routes/devices/services/message-history.service";
 import type {Message} from "~/routes/devices/schemas/message.schema";
+import {sensorSessionService} from "~/routes/devices/services/sensor-session.server";
 
 
 export function meta({matches}: Route.MetaArgs) {
@@ -25,25 +24,23 @@ export function meta({matches}: Route.MetaArgs) {
         {name: "description", content: "Simula dispositivos IOT y envía datos a tu API"},
     ];
 }
-export async function clientLoader({params}: Route.ClientLoaderArgs) {
 
-    const sensor = sensorService.getSensorById(params.deviceId);
+export async function loader({request, params}: Route.LoaderArgs) {
+
+    const sensor = await sensorSessionService.getSensorById(request, params.deviceId);
 
     if (!sensor) {
         throw redirect("/settings");
     }
 
-    const connectionStrings = connectionStorageService.getCurrentConnectionStrings();
-
     return {
         sensor,
-        connectionStrings,
     };
 }
 
 export default function DeviceSingle({loaderData}: Route.ComponentProps) {
 
-    const {sensor, connectionStrings} = loaderData;
+    const {sensor} = loaderData;
 
     const [messages, setMessages] = useState<Message[]>([]);
 
@@ -79,7 +76,7 @@ export default function DeviceSingle({loaderData}: Route.ComponentProps) {
                 key={`${sensor.id}-${JSON.stringify(sensor.payload)}`}
                 sensor={sensor}
                 messages={messages}
-                connectionStrings={connectionStrings}/>
+            />
 
         </div>
     )

@@ -1,13 +1,11 @@
 import React from "react";
 import type {Route} from "./+types/devices";
-import {sensorService} from "~/routes/devices/services/sensor.service";
-import {createActionHandler} from "~/routes/settings/handler/connection-settings-handler";
+import {createActionHandler, type HandlerResult} from "~/routes/settings/handler/connection-settings-handler";
 import {CreateSensorSchema, DeleteSensorSchema, UpdateSensorSchema} from "~/routes/devices/schemas/sensor.schema";
-import {Outlet, useSearchParams} from "react-router";
+import {data, Outlet, useSearchParams} from "react-router";
 import {DevicesGrid} from "~/routes/devices/components/devices-grid";
 import {sensorDataSentSchema, sensorModifyPayloadSchema} from "~/routes/devices/schemas/sensor-data.schema";
-import {sensorDataService} from "~/routes/devices/services/sensor-data.service";
-import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
+import {sensorSessionService} from "~/routes/devices/services/sensor-session.server";
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -16,66 +14,72 @@ export function meta({}: Route.MetaArgs) {
     ];
 }
 
+type RequestHandler = (request: Request, formData: FormData) => Promise<HandlerResult>
 
-const sensorHandlers = {
+const sensorHandlers: Record<string, RequestHandler> = {
     "create-sensor": createActionHandler(
         CreateSensorSchema,
-        (value) => sensorService.createNewSensor(value)
+        (request, value) => sensorSessionService.createNewSensor(request, value)
     ),
     "update-sensor": createActionHandler(
         UpdateSensorSchema,
-        (value) => sensorService.updateSensorData(value)
+        (request, value) => sensorSessionService.updateSensorData(request, value)
     ),
     "delete-sensor": createActionHandler(
         DeleteSensorSchema,
-        (value) => sensorService.deleteSensor(value.sensorId)
+        (request, value) => sensorSessionService.deleteSensor(request, value.sensorId)
     ),
     "regenerate-device-payload": createActionHandler(
         sensorDataSentSchema,
-        (value) => sensorDataService.regenerateSensorPayload(value.sensorId)
+        (request, value) => sensorSessionService.regenerateSensorPayload(request, value.sensorId)
     ),
     "modify-device-payload": createActionHandler(
         sensorModifyPayloadSchema,
-        (value) => sensorService.updateSensorPayload(value)
+        (request, value) => sensorSessionService.updateSensorPayload(request, value)
     ),
-    "send-device-payload": createActionHandler(
-        sensorDataSentSchema,
-        (value) => sensorDataService.sendDeviceData(value)
-    )
+    // "send-device-payload": createActionHandler(
+    //     sensorDataSentSchema,
+    //     (value) => sensorDataService.sendDeviceData(value)
+    // )
 }
 
-export async function clientLoader({request}: Route.ClientLoaderArgs) {
 
-    const sensors = sensorService.getAllSensors();
-    const connectionStrings = connectionStorageService.getCurrentConnectionStrings();
-    return {sensors, connectionStrings};
-
+export async function loader({request}: Route.LoaderArgs) {
+    const sensors = await sensorSessionService.getAllSensors(request);
+    return {sensors};
 }
 
-export async function clientAction({request}: Route.ClientActionArgs) {
+
+export async function action({request}: Route.ActionArgs) {
     const formData = await request.formData();
     const intentValue = formData.get("intent");
 
-    console.log(`Called client action with intent: ${intentValue}`);
+    console.log(`Called server action with intent: ${intentValue}`);
 
     if (!intentValue || typeof intentValue !== "string") {
-        throw new Error("Intent not provided or invalid");
+        return data({error: "Intent not provided or invalid"}, {status: 400});
     }
 
     if (!(intentValue in sensorHandlers)) {
-        throw new Error(`Unsupported intent: ${intentValue}`);
+        return data({error: `Unsupported intent: ${intentValue}`}, {status: 400});
     }
 
     const intent = intentValue as keyof typeof sensorHandlers;
-
-
     const handler = sensorHandlers[intent];
-    return handler(formData);
+
+    const handlerResult = await handler(request, formData);
+
+    const status = handlerResult.conformResult?.status === "error" ? 400 : 200;
+
+    return data(handlerResult.conformResult, {
+        status: status,
+        headers: handlerResult.headers,
+    })
 }
 
 
 export default function Devices({loaderData}: Route.ComponentProps) {
-    const {sensors, connectionStrings} = loaderData;
+    const {sensors} = loaderData
     const [searchParams, _] = useSearchParams();
 
     const viewMode = searchParams.get("view") as "grid" | "tabs";
@@ -85,7 +89,7 @@ export default function Devices({loaderData}: Route.ComponentProps) {
             <div>
                 {viewMode === "tabs" ?
                     <Outlet/> :
-                    <DevicesGrid connectionStrings={connectionStrings} sensors={sensors}/>
+                    <DevicesGrid sensors={sensors}/>
                 }
             </div>
         </>

@@ -8,15 +8,15 @@ import {Outlet} from "react-router";
 import {NavLink} from "~/components/link";
 import {cn} from "~/lib/utils";
 import {Button} from "~/components/ui/button";
-import {sensorService} from "~/routes/devices/services/sensor.service";
 import type {Sensor, SensorStatus} from "~/routes/devices/schemas/sensor.schema";
 import type {Route} from "./+types/layout";
 import {CreateSensorDialog} from "~/routes/devices/components/create-sensor-dialog";
 import {useSensorContext} from "~/routes/devices/context/sensor-context";
+import {sensorSessionService} from "~/routes/devices/services/sensor-session.server";
 
 
-export async function clientLoader({request}: Route.ClientLoaderArgs) {
-    const sensors = sensorService.getAllSensors();
+export async function loader({request}: Route.LoaderArgs) {
+    const sensors = await sensorSessionService.getAllSensors(request);
     return {sensors}
 }
 
@@ -183,7 +183,8 @@ function GithubLink() {
         </Tooltip>
     )
 }
-export function HydrateFallback(){
+
+export function HydrateFallback() {
     const [progress, setProgress] = useState(0)
 
     useEffect(() => {
@@ -208,7 +209,7 @@ export function HydrateFallback(){
                 </div>
                 <div className="flex justify-center">
                     <div className="relative h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                        <Loader2 className="h-8 w-8 text-primary animate-spin"/>
                     </div>
                 </div>
 
@@ -216,7 +217,7 @@ export function HydrateFallback(){
                     <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                         <div
                             className="h-full bg-primary transition-all duration-300 ease-out rounded-full"
-                            style={{ width: `${progress}%` }}
+                            style={{width: `${progress}%`}}
                         />
                     </div>
                     <p className="text-xs text-muted-foreground text-center">Cargando aplicación</p>
@@ -225,6 +226,7 @@ export function HydrateFallback(){
         </div>
     )
 }
+
 type NavigationLink = {
     name: string;
     to: string;

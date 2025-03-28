@@ -10,11 +10,11 @@ import {SettingsTab} from "./settings-tab";
 import {UpdateSensorDialog} from "~/routes/devices/components/update-sensor-dialog";
 import {href, useFetcher} from "react-router";
 import {useSensor} from "~/routes/devices/context/sensor-context";
+import type {BrokerConnectionSettings, HttpConnectionSettings} from "~/routes/settings/schemas/connection.schema";
 
 
-export function DeviceCard({sensor, connectionStrings}: {
+export function DeviceCard({sensor}: {
     sensor: Sensor,
-    connectionStrings: { http: string, mqtt: string }
 }) {
 
     const fetcher = useFetcher({key: "delete-sensor"})
@@ -77,7 +77,7 @@ export function DeviceCard({sensor, connectionStrings}: {
                     <TabsContent value="settings" className="space-y-4 pt-4">
                         <SettingsTab
                             deviceId={sensor.id}
-                            sendingTo={sensor.type === "ESP32" ? connectionStrings.http : connectionStrings.mqtt}
+                            sendingTo={"your mom"}
                         />
                     </TabsContent>
                 </Tabs>

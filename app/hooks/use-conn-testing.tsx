@@ -6,8 +6,8 @@ import {
     type ConnectionSettings,
     type HttpConnectionSettings,
     isHttpConnectionSettings,
-    isMqttConnectionSettings,
-    type MqttConnectionSettings
+    isBrokerConnectionSettings,
+    type BrokerConnectionSettings
 } from "~/routes/settings/schemas/connection.schema";
 
 async function testHttpConnection(settings: HttpConnectionSettings): Promise<{
@@ -42,7 +42,7 @@ async function testHttpConnection(settings: HttpConnectionSettings): Promise<{
     }
 }
 
-async function testMqttConnection(config: MqttConnectionSettings): Promise<{ success: boolean; message: string }> {
+async function testMqttConnection(config: BrokerConnectionSettings): Promise<{ success: boolean; message: string }> {
     return new Promise((resolve) => {
         try {
             const url = `mqtt://${config.broker}:${config.port}`;
@@ -111,8 +111,8 @@ export function useConnTesting() {
                 result = await testHttpConnection(settings as HttpConnectionSettings);
                 setHttpConnectionResult(result);
                 setMqttConnectionResult({});
-            } else if (isMqttConnectionSettings(settings)) {
-                result = await testMqttConnection(settings as MqttConnectionSettings);
+            } else if (isBrokerConnectionSettings(settings)) {
+                result = await testMqttConnection(settings as BrokerConnectionSettings);
                 setMqttConnectionResult(result);
                 setHttpConnectionResult({});
             } else {

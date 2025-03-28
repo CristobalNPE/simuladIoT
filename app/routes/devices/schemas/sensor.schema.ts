@@ -48,5 +48,5 @@ export type DeleteSensor = z.infer<typeof DeleteSensorSchema>;
 export type SensorStatus = z.infer<typeof SensorStatusSchema>;
 export type SensorType = z.infer<typeof SensorTypeSchema>;
 export type Sensor = z.infer<typeof SensorSchema>;
-export type CreateSensor = z.infer<typeof UpdateSensorSchema>;
+export type CreateSensor = z.infer<typeof CreateSensorSchema>;
 export type UpdateSensor = z.infer<typeof UpdateSensorSchema>;

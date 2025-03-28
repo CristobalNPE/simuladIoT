@@ -11,6 +11,8 @@ export default [
         route(":deviceId", "routes/devices/device-single.tsx"),
         route("settings", "routes/settings/settings.tsx"),
         route("send-to-broker", "routes/send-message-to-broker.tsx"),
-    ])
+    ]),
+
+    route("api/trigger-auto-send", "routes/api/trigger-auto-send.tsx"),
 
 ] satisfies RouteConfig;

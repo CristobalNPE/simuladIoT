@@ -1,109 +1,68 @@
 import {
+    type BrokerConnectionSettings,
+    BrokerConnectionSettingsSchema,
     type HttpConnectionSettings,
-    HttpConnectionSettingsSchema,
-    type MqttConnectionSettings,
-    MqttConnectionSettingsSchema
+    HttpConnectionSettingsSchema
 } from "~/routes/settings/schemas/connection.schema";
+import {settingsSessionStorage} from "~/routes/settings/sessions/settings-storage.server";
 
-const HTTP_SETTINGS_KEY = 'http_settings';
-const MQTT_SETTINGS_KEY = 'mqtt_settings';
 
 const defaultHttpSettings: HttpConnectionSettings = {
-    domain: 'localhost',
-    port: 8080,
-    endpoint: '/api/v1/sensor_data',
-    isLocal: true
+    connectionString: "http://localhost:8080/api/v1/sensor_data",
 };
 
-const defaultMqttSettings: MqttConnectionSettings = {
-    broker: 'localhost',
-    port: 9001,
-    topic: 'iot/sensors',
-    isLocal: true
+const defaultBrokerSettings: BrokerConnectionSettings = {
+    broker: "activemq-http",
+    destination: "iot/sensors",
+    connectionString: "tcp://localhost:61616",
+
 };
 
+const BROKER_SETTINGS_KEY = "broker-settings";
+const HTTP_SETTINGS_KEY = "http-settings";
 export const connectionStorageService = {
 
-    getHttpSettings(): HttpConnectionSettings {
-        const httpSettings = localStorage.getItem(HTTP_SETTINGS_KEY);
+    async getHttpConnectionSettingsFromRequest(request: Request): Promise<HttpConnectionSettings> {
+        const session = await settingsSessionStorage.getSession(request.headers.get("Cookie"));
+        let httpSettings: HttpConnectionSettings;
 
-        if (!httpSettings) {
-            this.saveHttpSettings(defaultHttpSettings);
-            return defaultHttpSettings;
-        }
         try {
-            const parsedSettings = JSON.parse(httpSettings);
-            if (parsedSettings) {
-                return HttpConnectionSettingsSchema.parse(parsedSettings);
-            }
-            return defaultHttpSettings;
+            httpSettings = HttpConnectionSettingsSchema.parse(session.get(HTTP_SETTINGS_KEY));
+            console.log(`Http settings parsed from session:`, httpSettings);
         } catch (error) {
-            console.error('Error parsing HTTP settings from local storage:', error);
-            return defaultHttpSettings;
+            console.error("Error parsing broker settings from session, using defaults:", error);
+           return defaultHttpSettings;
         }
+        return httpSettings;
     },
 
-    saveHttpSettings(settings: HttpConnectionSettings): void {
-        const settingsString = JSON.stringify(settings);
-        localStorage.setItem(HTTP_SETTINGS_KEY, settingsString);
-    },
+    async getBrokerConnectionSettingsFromRequest(request: Request): Promise<BrokerConnectionSettings> {
+        const session = await settingsSessionStorage.getSession(request.headers.get("Cookie"));
+        let brokerSettings: BrokerConnectionSettings;
 
-    getMqttSettings(): MqttConnectionSettings {
-        const mqttSettings = localStorage.getItem(MQTT_SETTINGS_KEY);
-
-        if (!mqttSettings) {
-            this.saveMqttSettings(defaultMqttSettings);
-            return defaultMqttSettings;
-        }
         try {
-            const parsedSettings = JSON.parse(mqttSettings);
-            if (parsedSettings) {
-                return MqttConnectionSettingsSchema.parse(parsedSettings);
-            }
-            return defaultMqttSettings;
+            brokerSettings = BrokerConnectionSettingsSchema.parse(session.get(BROKER_SETTINGS_KEY));
+            console.log(`Broker settings parsed from session:`, brokerSettings);
         } catch (error) {
-            console.error('Error parsing MQTT settings from local storage:', error);
-            return defaultMqttSettings;
+            console.error("Error parsing broker settings from session, using defaults:", error);
+            return defaultBrokerSettings;
         }
+        return brokerSettings;
     },
 
-    getCurrentConnectionStrings() {
+    async getCurrentConnectionSettings(request: Request): Promise<{ broker: BrokerConnectionSettings, http: HttpConnectionSettings }> {
         return {
-            mqtt: this.getMqttConnectionString(),
-            http: this.getHttpConnectionString()
+            broker: await this.getBrokerConnectionSettingsFromRequest(request),
+            http: await this.getHttpConnectionSettingsFromRequest(request)
         }
     },
 
-    getHttpConnectionString() {
-        const httpSettings = this.getHttpSettings();
-
-        const isLocalDomain = httpSettings.domain === 'localhost' || httpSettings.domain === '127.0.0.1';
-        const protocol = isLocalDomain ? "http" : "https";
-        const sanitizedEndpoint = httpSettings.endpoint.startsWith("/") ? httpSettings.endpoint : `/${httpSettings.endpoint}`
-        return `${protocol}://${httpSettings.domain}${isLocalDomain ? `:${httpSettings.port}` : ''}${sanitizedEndpoint}`;
-    },
-
-    getMqttConnectionString() {
-        const mqttSettings = this.getMqttSettings();
-        const isLocalDomain = mqttSettings.broker === 'localhost' || mqttSettings.broker === '127.0.0.1';
-        const protocol = "ws"; // or tcp?
-        const sanitizedTopic = mqttSettings.topic.startsWith("/") ? mqttSettings.topic : `/${mqttSettings.topic}`
-        return `${protocol}://${mqttSettings.broker}${isLocalDomain ? `:${mqttSettings.port}` : ''}${sanitizedTopic}`;
-    },
-
-
-    saveMqttSettings(settings: MqttConnectionSettings): void {
-        const settingsString = JSON.stringify(settings);
-        localStorage.setItem(MQTT_SETTINGS_KEY, settingsString);
-    },
-
-    clearHttpSettings(): void {
-        localStorage.removeItem(HTTP_SETTINGS_KEY);
-    },
-
-    clearMqttSettings(): void {
-        localStorage.removeItem(MQTT_SETTINGS_KEY);
-    }
+        //TODO: DELETE FROM SESSION
+    // clearHttpSettings(): void {
+    // },
+    //
+    // clearMqttSettings(): void {
+    // }
 
 
 }

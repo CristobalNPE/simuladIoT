@@ -1,8 +1,7 @@
 import {CreateSensorSchema, type SensorType} from "~/routes/devices/schemas/sensor.schema";
 import {href, useFetcher} from "react-router";
-import {getFormProps, getInputProps, useForm} from "@conform-to/react";
+import {getFormProps, getInputProps, type SubmissionResult, useForm} from "@conform-to/react";
 import {getZodConstraint, parseWithZod} from "@conform-to/zod";
-import {DEFAULT_SENSOR_CATEGORY} from "~/routes/devices/services/sensor.service";
 import {
     Dialog,
     DialogContent,
@@ -17,16 +16,26 @@ import {getSensorCategories} from "~/routes/devices/utils/sensor.utils";
 import {Label} from "~/components/ui/label";
 import {StatusButton} from "~/components/ui/status-button";
 import {useDialogAutoClose} from "~/hooks/use-dialog-autoclose";
+import type {action} from "~/routes/devices/devices";
+import type {SensorCategory} from "~/routes/devices/schemas/sensor-types.schema";
 
 interface CreateSensorDialogProps {
     type: SensorType,
     children: React.ReactNode
 }
 
+function isSubmissionResult(data: any): data is SubmissionResult<any> {
+    return data != null && typeof data === 'object' && ('status' in data || 'error' in data || 'value' in data || 'intent' in data);
+}
+
+const DEFAULT_SENSOR_CATEGORY: SensorCategory = 'temperature';
+
 export function CreateSensorDialog({type, children}: CreateSensorDialogProps) {
 
-    const fetcher = useFetcher({key: "create-sensor"})
+    const fetcher = useFetcher<typeof action>({key: "create-sensor"})
     const isPending = fetcher.state !== "idle";
+
+    const lastResult = !isPending && isSubmissionResult(fetcher.data) ? fetcher.data : null;
 
     const [form, fields] = useForm({
         id: `create-sensor-form`,
@@ -35,14 +44,14 @@ export function CreateSensorDialog({type, children}: CreateSensorDialogProps) {
             sensorType: type,
             category: DEFAULT_SENSOR_CATEGORY
         },
-        lastResult: !isPending ? fetcher.data?.result : null,
+        lastResult: lastResult,
         onValidate({formData}) {
             return parseWithZod(formData, {schema: CreateSensorSchema})
         },
         shouldRevalidate: "onBlur",
     })
 
-    const shouldClose = fetcher.data?.result?.status === "success" && !isPending;
+    const shouldClose = lastResult?.status === "success" && !isPending;
     const [open, setOpen] = useDialogAutoClose(shouldClose)
     return (
         <Dialog open={open} onOpenChange={setOpen}>

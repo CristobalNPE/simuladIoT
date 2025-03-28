@@ -10,6 +10,7 @@ import type {SensorType} from "~/routes/devices/schemas/sensor.schema";
 import {sensorDataSentSchema} from "~/routes/devices/schemas/sensor-data.schema";
 import type {SensorPayload} from "../schemas/sensor-types.schema";
 import {PayloadDisplay} from "./payload-display";
+import type {action} from "~/routes/send-message-to-broker";
 
 interface PayloadTabProps {
     sensorId: string
@@ -66,19 +67,41 @@ export function PayloadTab({sensorId, sensorType, apiKey, payload}: PayloadTabPr
                     <RefreshCw className="inline-flex mr-4"/>
                     Regenerar
                 </StatusButton>
-                <StatusButton
-                    name={"intent"}
-                    value={"send-device-payload"}
-                    form={form.id}
-                    status={isPending ? "pending" : form.status ?? "idle"}
-                    type="submit"
-                    disabled={isPending}
-                >
-                    <Send className="inline-flex mr-4"/>
-                    Enviar Datos
-                </StatusButton>
+                <SendDevicePayload payload={payload} sensorId={sensorId} sensorType={sensorType}/>
             </div>
         </>
+    )
+}
+
+function SendDevicePayload({sensorId, sensorType, payload}: {
+    sensorId: string,
+    sensorType: SensorType,
+    payload: SensorPayload
+}) {
+    const fetcher = useFetcher<typeof action>({key: `send-payload-${sensorId}`})
+    const isPending = fetcher.state !== "idle";
+    const formId = `send-device-payload-${sensorId}`
+
+    return (
+        <fetcher.Form
+            id={formId}
+            action={href("/send-to-broker")}
+            method={"POST"}
+        >
+            <input type={"hidden"} name={"payload"} value={JSON.stringify(payload, null, 2)}/>
+            <input type={"hidden"} name={"sensorType"} value={sensorType}/>
+            <StatusButton
+                name={"intent"}
+                value={"send-device-payload"}
+                form={formId}
+                status={isPending ? "pending" : "idle"}
+                type="submit"
+                disabled={isPending}
+            >
+                <Send className="inline-flex mr-4"/>
+                Enviar Datos
+            </StatusButton>
+        </fetcher.Form>
     )
 }
 

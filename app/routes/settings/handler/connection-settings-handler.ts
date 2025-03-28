@@ -1,43 +1,48 @@
 import {parseWithZod} from "@conform-to/zod";
 import {z} from "zod";
-import {data} from "react-router";
+import type {SubmissionResult} from "@conform-to/react";
 
-type ApplyMethod<T, R = any> = (value: T) => Promise<R> | R;
+type ApplyMethod<T> = (
+    request: Request,
+    value: T
+) => Promise<{ headers: Headers }>;
+
+export interface HandlerResult {
+    conformResult: Record<string, any>;  // result from submission.reply()
+    headers?: Headers;
+}
 
 
 export function createActionHandler<T>(
     schema: z.ZodSchema<T>,
     applyMethod: ApplyMethod<T>
 ) {
-    return async (formData: FormData) => {
+    // this inner function is the actual handler invoked by the action
+    return async (request: Request, formData: FormData): Promise<HandlerResult> => {
         const submission = parseWithZod(formData, {schema});
-        console.log(submission)
+        console.log("Submission:", submission);
+
         if (submission.status !== "success") {
-            return data(
-                {result: submission.reply()},
-                {status: submission.status !== "error" ? 400 : 200}
-            );
+            return {conformResult: submission.reply()};
         }
 
+        try {
+            const serviceResult = await applyMethod(request, submission.value);
+            const dataResult = submission.reply();
+            const withReset = submission.reply({resetForm: true});
 
-        await applyMethod(submission.value);
+            return {
+                conformResult: {...dataResult, ...withReset},
+                headers: serviceResult.headers,
+            }
 
-        const dataResult = submission.reply();
-        const withReset = submission.reply({resetForm: true});
-
-        return {
-            result: {
-                ...dataResult,
-                ...withReset,
-            },
-        };
-
+        } catch (error) {
+            console.error("Error during action handler applyMethod:", error);
+            return {
+                conformResult: submission.reply({
+                    formErrors: [error instanceof Error ? error.message : "An unexpected error occurred."],
+                }),
+            };
+        }
     }
-
-
 }
-
-// type HandlerFunction = (formData: FormData) => Promise<any>;
-//
-// type CasesMap = Record<string, HandlerFunction>;
-
