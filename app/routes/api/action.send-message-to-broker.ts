@@ -4,7 +4,7 @@ import {sendDeviceData} from "~/routes/devices/services/message-sending.server";
 import {data} from "react-router";
 import {sensorSessionService} from "../devices/services/sensor-session.server";
 import {messageHistoryService} from "~/routes/devices/services/message-history.server";
-import type { Route } from "../+types/send-message-to-broker";
+import type { Route } from "./+types/action.send-message-to-broker";
 
 
 export async function action({request}: Route.ActionArgs) {
@@ -42,21 +42,34 @@ export async function action({request}: Route.ActionArgs) {
         }
 
         let connectionSettings;
+        let settingsAreDefault = false;
+
         switch (sensorType) {
             case "ESP32": {
-                connectionSettings = await connectionStorageServer.getHttpConnectionSettingsFromRequest(request);
-                if (!connectionSettings) throw new Error("HTTP connection settings not found.");
+                const httpResult = await connectionStorageServer.getHttpConnectionSettingsFromRequest(request);
+                connectionSettings = httpResult.settings;
+                settingsAreDefault = httpResult.isDefault;
                 break;
             }
             case "ZIGBEE": {
-                connectionSettings = await connectionStorageServer.getBrokerConnectionSettingsFromRequest(request);
-                if (!connectionSettings) throw new Error("Broker connection settings not found.");
+                const brokerResult = await connectionStorageServer.getBrokerConnectionSettingsFromRequest(request);
+                connectionSettings = brokerResult.settings;
+                settingsAreDefault = brokerResult.isDefault;
                 break;
             }
             default: {
                 // should be caught by initial validation
                 throw new Error(`Unsupported sensor type: ${sensorType}`);
             }
+        }
+
+        if (settingsAreDefault) {
+            console.warn(`Manual send aborted for ${sensorId}: Using default connection settings.`);
+            return data({
+                success: false,
+                message: "Cannot send manually using default connection settings. Please configure first."
+            }, {status: 400});
+
         }
 
         const sendResult = await sendDeviceData(payloadString, connectionSettings);

@@ -10,9 +10,15 @@ import {ConnectionTestResult} from "~/routes/settings/components/connection-test
 import type {TestConnectionResult} from "~/routes/api/types/connection-test.types";
 import {isSubmissionResult} from "~/utils/conform-utils";
 import {toast} from "sonner";
+import {Alert, AlertDescription} from "~/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 
-export function HttpSettingsForm({currentSettings}: { currentSettings: HttpConnectionSettings }) {
+export function HttpSettingsForm({currentSettings, isDefault}: {
+    currentSettings: HttpConnectionSettings | null | undefined,
+    isDefault: boolean
+}) {
+
     const saveFetcher = useFetcher<typeof action>(({key: "http-connection-settings"}))
     const testFetcher = useFetcher<TestConnectionResult>({key: "http-test-connection"})
 
@@ -58,6 +64,15 @@ export function HttpSettingsForm({currentSettings}: { currentSettings: HttpConne
 
     return (
         <>
+            {isDefault && (
+                <Alert variant="default" className="mb-4 bg-yellow-50 border border-yellow-200 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700/50">
+                    <AlertCircle className="h-4 w-4 !text-yellow-800 dark:!text-yellow-300" />
+                    {/* <AlertTitle>Atención</AlertTitle> */}
+                    <AlertDescription className="text-xs">
+                        Estás viendo la configuración por defecto. Guarda tus propios ajustes para asegurar la conexión y crear dispositivos.
+                    </AlertDescription>
+                </Alert>
+            )}
             <saveFetcher.Form
                 ref={formRef}
                 action={href("/settings")}

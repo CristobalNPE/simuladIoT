@@ -56,17 +56,17 @@ export async function action({request}: Route.ActionArgs) {
 
 export async function loader({request}: Route.LoaderArgs) {
 
-    const [brokerSettings, httpSettings] = await Promise.all([
+    const [brokerResult, httpResult] = await Promise.all([
         connectionStorageServer.getBrokerConnectionSettingsFromRequest(request),
         connectionStorageServer.getHttpConnectionSettingsFromRequest(request)
     ])
 
-    return {httpSettings, brokerSettings};
+    return {httpResult, brokerResult};
 }
 
 export default function Settings({loaderData}: Route.ComponentProps) {
 
-    const {httpSettings, brokerSettings} = loaderData
+    const {httpResult, brokerResult} = loaderData
 
     return (
         <div className={"col-span-3  bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-6 shadow-sm"}>
@@ -80,10 +80,15 @@ export default function Settings({loaderData}: Route.ComponentProps) {
                     <TabsTrigger value="mqtt">MQTT (Zigbee)</TabsTrigger>
                 </TabsList>
                 <TabsContent value="http" className={"pt-4"}>
-                    <HttpSettingsForm currentSettings={httpSettings}/>
+                    <HttpSettingsForm currentSettings={httpResult.settings}
+                                      isDefault={httpResult.isDefault}
+
+                    />
                 </TabsContent>
                 <TabsContent value="mqtt" className={"pt-4"}>
-                    <BrokerSettingsForm currentSettings={brokerSettings}/>
+                    <BrokerSettingsForm currentSettings={brokerResult.settings}
+                                        isDefault={brokerResult.isDefault}
+                    />
                 </TabsContent>
             </Tabs>
         </div>

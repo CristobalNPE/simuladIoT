@@ -3,7 +3,6 @@ import {data} from "react-router";
 import {connectionStorageServer} from "~/routes/settings/services/connection-storage.server";
 import {addVarianceToPayload} from "~/routes/devices/utils/payload.utils";
 import {sendDeviceData} from "~/routes/devices/services/message-sending.server";
-import type {Route} from "./+types/trigger-auto-send";
 import {messageHistoryService} from "~/routes/devices/services/message-history.server";
 
 interface TriggerAutoSendRequestBody {
@@ -42,7 +41,7 @@ export async function action({request}: Route.ActionArgs) {
         const payloadString = JSON.stringify(payloadObject, null, 2);
 
         console.log(`[AutoSend Action] Sending data for sensor ${sensorId}...`);
-        const sendResult = await sendDeviceData(payloadString, connectionSettings);
+        const sendResult = await sendDeviceData(payloadString, connectionSettings.settings);
 
         // record history ---------------------------------------
         try {

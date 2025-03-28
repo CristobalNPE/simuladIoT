@@ -21,19 +21,24 @@ const defaultBrokerSettings: BrokerConnectionSettings = {
     }
 };
 
+type SettingsResult<T> = {
+    settings: T,
+    isDefault: boolean
+}
+
 const BROKER_SETTINGS_KEY = "broker-settings";
 const HTTP_SETTINGS_KEY = "http-settings";
 export const connectionStorageServer = {
 
-    async getHttpConnectionSettingsFromRequest(request: Request): Promise<HttpConnectionSettings> {
+    async getHttpConnectionSettingsFromRequest(request: Request): Promise<SettingsResult<HttpConnectionSettings>> {
         const session = await getSession(request.headers.get("Cookie"));
         const settingsData = session.get(HTTP_SETTINGS_KEY);
 
         const parseResult = HttpConnectionSettingsSchema.safeParse(settingsData);
         if (parseResult.success) {
-            return parseResult.data;
+            return {settings: parseResult.data, isDefault: false};
         } else {
-            return defaultHttpSettings;
+            return {settings: defaultHttpSettings, isDefault: true};
         }
     },
 
@@ -49,15 +54,15 @@ export const connectionStorageServer = {
         return {headers};
     },
 
-    async getBrokerConnectionSettingsFromRequest(request: Request): Promise<BrokerConnectionSettings> {
+    async getBrokerConnectionSettingsFromRequest(request: Request): Promise<SettingsResult<BrokerConnectionSettings>> {
         const session = await getSession(request.headers.get("Cookie"));
         const settingsData = session.get(BROKER_SETTINGS_KEY);
 
         const parseResult = BrokerConnectionSettingsSchema.safeParse(settingsData);
         if (parseResult.success) {
-            return parseResult.data;
+            return {settings: parseResult.data, isDefault: false};
         } else {
-            return defaultBrokerSettings;
+            return {settings: defaultBrokerSettings, isDefault: true};
         }
     },
 
@@ -71,16 +76,6 @@ export const connectionStorageServer = {
         const headers = new Headers({"Set-Cookie": await commitSession(session)});
         console.log(`Stored Broker settings in session.`);
         return {headers};
-    },
-
-    async getCurrentConnectionSettings(request: Request): Promise<{
-        broker: BrokerConnectionSettings,
-        http: HttpConnectionSettings
-    }> {
-        return {
-            broker: await this.getBrokerConnectionSettingsFromRequest(request),
-            http: await this.getHttpConnectionSettingsFromRequest(request)
-        }
     },
 
     /**
