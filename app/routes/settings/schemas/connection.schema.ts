@@ -25,11 +25,16 @@ export type BrokerConnectionSettings = z.infer<typeof BrokerConnectionSettingsSc
 export type ConnectionSettings = HttpConnectionSettings | BrokerConnectionSettings
 
 export function isHttpConnectionSettings(settings: ConnectionSettings): settings is HttpConnectionSettings {
-    return 'domain' in settings && 'endpoint' in settings;
+    return (
+        settings != null &&
+        typeof settings === 'object' &&
+        !('broker' in settings));
 }
 
 export function isBrokerConnectionSettings(settings: ConnectionSettings): settings is BrokerConnectionSettings {
-    return 'destination' in settings;
+    return (settings != null &&
+        typeof settings === 'object' &&
+        'destination' in settings)
 }
 
 export function validateConnectionSettings(settings: unknown): ConnectionSettings {

@@ -4,11 +4,10 @@ import {ArrowRight, CheckCircle, Clock, Send, Trash2, XCircle} from "lucide-reac
 import {ScrollArea} from "~/components/ui/scroll-area"
 import type {Message} from "../schemas/message.schema"
 import {cn} from "~/lib/utils";
-import {messageHistoryService} from "~/routes/devices/services/message-history.service";
 import {href, useFetcher} from "react-router";
 
 
-export function MessagesTab({messages,sensorId}: { messages: Message[], sensorId: string }) {
+export function MessagesTab({messages, sensorId}: { messages: Message[], sensorId: string }) {
 
     const clearHistoryFetcher = useFetcher(({key: `clear-history-${sensorId}`}))
     const isClearing = clearHistoryFetcher.state !== "idle";
@@ -44,7 +43,7 @@ export function MessagesTab({messages,sensorId}: { messages: Message[], sensorId
                 {messages.length > 0 ? (
                     <ScrollArea className="h-[400px] pr-4">
                         <div className="space-y-6">
-                            {messages.map((message,index) => (
+                            {messages.map((message, index) => (
                                 <div key={message.id} className={cn("border rounded-lg p-4")}>
                                     <div className="flex justify-between items-center mb-3">
                                         <div className="flex items-center gap-2">

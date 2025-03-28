@@ -12,10 +12,9 @@ import {brokerRequiresAuth, type BrokerType, brokerTypeMetadata, getAllBrokerTyp
 import {Label} from "~/components/ui/label";
 import {cn} from "~/lib/utils";
 import type {action} from "~/routes/settings/settings";
-import {Unplug} from "lucide-react";
-import {Button} from "~/components/ui/button";
+import {ConnectionTestResult} from "~/routes/settings/components/connection-test-result";
+import type {TestConnectionResult} from "~/routes/api/types/connection-test.types";
 
-type TestConnectionResult = { success: boolean; message: string };
 
 export function BrokerSettingsForm({currentSettings}: { currentSettings: BrokerConnectionSettings }) {
     const saveFetcher = useFetcher<typeof action>(({key: "broker-connection-settings"}))
@@ -130,27 +129,11 @@ export function BrokerSettingsForm({currentSettings}: { currentSettings: BrokerC
 
 
                 <ErrorList errors={form.errors} id={form.errorId}/>
-                <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center my-4">
-                    <Button
-                        type="button"
-                        onClick={handleTestConnection}
-                        variant="outline"
-                        className="flex items-center gap-2"
-                        disabled={isTesting || isSaving}
-                    >
-                        <Unplug className="h-4 w-4" />
-                        {isTesting ? "Probando..." : "Probar Conexión"}
-                    </Button>
-
-                    {testFetcher.data && !isTesting && (
-                        <div className={cn(
-                            "px-3 py-1 rounded text-sm",
-                            testFetcher.data.success ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                        )}>
-                            {testFetcher.data.message}
-                        </div>
-                    )}
-                </div>
+                <ConnectionTestResult handleTestConnection={handleTestConnection}
+                                      isTesting={isTesting}
+                                      isSaving={isSaving}
+                                      testResult={testFetcher.data}
+                />
 
                 <div className={"flex justify-center mt-6"}>
                     <StatusButton

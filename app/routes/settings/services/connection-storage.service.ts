@@ -83,7 +83,6 @@ export const connectionStorageService = {
 
         // true only if BOTH are present and valid
         const bothValid = httpParseResult.success && brokerParseResult.success;
-        console.log(`[CheckConnections] Both settings valid: ${bothValid}`);
         return bothValid;
     },
 
