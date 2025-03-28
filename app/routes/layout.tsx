@@ -66,12 +66,11 @@ function SidePanel({sensors, connectionsConfigured}: { sensors: Sensor[], connec
                 <nav className={"flex flex-col gap-2 "}>
                     {navigationLinks.map((link, index) => {
 
-                        if (link.to === "/devices" && !connectionsConfigured) {
-                            return (
-                                    <Tooltip >
+                            if (link.to === "/devices" && !connectionsConfigured) {
+                                return (
+                                    <Tooltip key={index}>
                                         <TooltipTrigger asChild>
                                             <div
-                                                key={index}
                                                 className={cn("border p-2 px-3 text-sm rounded-md cursor-not-allowed text-muted-foreground")}
                                             >
                                                 {link.name}
@@ -82,25 +81,24 @@ function SidePanel({sensors, connectionsConfigured}: { sensors: Sensor[], connec
                                         </TooltipContent>
                                     </Tooltip>
 
-                            );
+                                );
+                            }
+
+                            return (
+                                <NavLink
+                                    key={index}
+                                    to={link.to}
+                                    className={({isActive, isPending}) =>
+                                        cn("border p-2 px-3 text-sm rounded-md",
+                                            isActive && "bg-primary text-primary-foreground",
+                                        )
+                                    }
+                                >
+                                    {link.name}
+                                </NavLink>
+                            )
+
                         }
-
-                        return (
-                            <NavLink
-                                key={index}
-                                to={link.to}
-                                className={({isActive, isPending}) =>
-                                    cn("border p-2 px-3 text-sm rounded-md",
-                                        isActive && "bg-primary text-primary-foreground",
-                                    )
-                                }
-                            >
-                                {link.name}
-                            </NavLink>
-                        )
-
-                        }
-
                     )}
                 </nav>
                 <div className={"flex justify-between gap-2 flex-wrap"}>
@@ -109,7 +107,8 @@ function SidePanel({sensors, connectionsConfigured}: { sensors: Sensor[], connec
                     </p>
                     {
                         !connectionsConfigured &&
-                        <p className={"font-normal text-muted-foreground text-xs italic"}>Primero debes configurar las conexiones</p>
+                        <p className={"font-normal text-muted-foreground text-xs italic"}>Primero debes configurar las
+                            conexiones</p>
                     }
                     <div className={"flex justify-between gap-2 flex-wrap  w-full "}>
                         <CreateSensorDialog type={"ESP32"}>
