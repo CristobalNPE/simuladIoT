@@ -13,21 +13,28 @@ import type {Route} from "./+types/layout";
 import {CreateSensorDialog} from "~/routes/devices/components/create-sensor-dialog";
 import {useSensorContext} from "~/routes/devices/context/sensor-context";
 import {sensorSessionService} from "~/routes/devices/services/sensor-session.server";
+import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
 
 
 export async function loader({request}: Route.LoaderArgs) {
-    const sensors = await sensorSessionService.getAllSensors(request);
-    return {sensors}
+
+    const [sensors, connectionsConfigured] = await Promise.all([
+        sensorSessionService.getAllSensors(request),
+        connectionStorageService.checkConnectionsExist(request)
+    ]);
+
+
+    return {sensors, connectionsConfigured}
 }
 
 export default function Layout({loaderData}: Route.ComponentProps) {
-    const {sensors} = loaderData;
+    const {sensors, connectionsConfigured} = loaderData;
 
     return (
         <>
             <Header/>
             <div className={"grid 2xl:grid-cols-5 lg:grid-cols-4 container  mx-auto p-2 py-4 items-start relative"}>
-                <SidePanel sensors={sensors}/>
+                <SidePanel sensors={sensors} connectionsConfigured={connectionsConfigured}/>
                 <main
                     className={"2xl:col-span-4 lg:col-span-3 sm:ml-6  flex flex-col gap-6 "}>
                     <Outlet/>
@@ -37,7 +44,7 @@ export default function Layout({loaderData}: Route.ComponentProps) {
     )
 }
 
-function SidePanel({sensors}: { sensors: Sensor[] }) {
+function SidePanel({sensors, connectionsConfigured}: { sensors: Sensor[], connectionsConfigured: boolean }) {
 
     const navigationLinks: NavigationLink[] = [
         {
@@ -70,17 +77,23 @@ function SidePanel({sensors}: { sensors: Sensor[] }) {
                     )}
                 </nav>
                 <div className={"flex justify-between gap-2 flex-wrap"}>
-                    <p className={"text-sm font-semibold"}>Añadir Dispositivo</p>
+                    <p className={"text-sm font-semibold"}>
+                        Añadir Dispositivo
+                    </p>
+                    {
+                        !connectionsConfigured &&
+                        <p className={"font-normal text-muted-foreground text-xs italic"}>Primero debes configurar las conexiones</p>
+                    }
                     <div className={"flex justify-between gap-2 flex-wrap  w-full "}>
                         <CreateSensorDialog type={"ESP32"}>
-                            <Button className={"flex grow"}>
+                            <Button disabled={!connectionsConfigured} className={"flex grow"}>
                                 <Wifi className="mr-2 h-4 w-4"/>
                                 ESP32
                             </Button>
                         </CreateSensorDialog>
 
                         <CreateSensorDialog type={"ZIGBEE"}>
-                            <Button className={"flex grow"}>
+                            <Button disabled={!connectionsConfigured} className={"flex grow"}>
                                 <Radio className="mr-2 h-4 w-4"/>
                                 Zigbee
                             </Button>

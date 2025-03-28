@@ -14,5 +14,6 @@ export default [
     ]),
 
     route("api/trigger-auto-send", "routes/api/trigger-auto-send.tsx"),
+    route("api/test-connection", "routes/api/test-connection.tsx"),
 
 ] satisfies RouteConfig;

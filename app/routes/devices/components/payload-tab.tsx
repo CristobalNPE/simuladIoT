@@ -1,6 +1,5 @@
 import React from "react";
 import {href, useFetcher} from "react-router";
-import type {clientAction} from "~/routes/devices/devices";
 import {getZodConstraint, parseWithZod} from "@conform-to/zod";
 import {getFormProps, useForm} from "@conform-to/react";
 import {ErrorList} from "~/components/forms";
@@ -21,7 +20,7 @@ interface PayloadTabProps {
 
 export function PayloadTab({sensorId, sensorType, apiKey, payload}: PayloadTabProps) {
 
-    const fetcher = useFetcher<typeof clientAction>({key: `send-payload-${sensorId}`})
+    const fetcher = useFetcher({key: `send-payload-${sensorId}`})
     const isPending = fetcher.state !== "idle";
 
     const [form, fields] = useForm({
@@ -89,6 +88,7 @@ function SendDevicePayload({sensorId, sensorType, payload}: {
             method={"POST"}
         >
             <input type={"hidden"} name={"payload"} value={JSON.stringify(payload, null, 2)}/>
+            <input type={"hidden"} name={"sensorId"} value={sensorId}/>
             <input type={"hidden"} name={"sensorType"} value={sensorType}/>
             <StatusButton
                 name={"intent"}

@@ -10,7 +10,6 @@ import {SettingsTab} from "./settings-tab";
 import {UpdateSensorDialog} from "~/routes/devices/components/update-sensor-dialog";
 import {href, useFetcher} from "react-router";
 import {useSensor} from "~/routes/devices/context/sensor-context";
-import type {BrokerConnectionSettings, HttpConnectionSettings} from "~/routes/settings/schemas/connection.schema";
 
 
 export function DeviceCard({sensor}: {

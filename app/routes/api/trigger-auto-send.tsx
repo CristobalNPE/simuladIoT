@@ -4,6 +4,7 @@ import {connectionStorageService} from "~/routes/settings/services/connection-st
 import {addVarianceToPayload} from "~/routes/devices/utils/payload.utils";
 import {sendDeviceData} from "~/routes/devices/services/message-sending.server";
 import type {Route} from "./+types/trigger-auto-send";
+import {messageHistoryService} from "~/routes/devices/services/message-history.server";
 
 interface TriggerAutoSendRequestBody {
     sensorId: string;
@@ -11,6 +12,7 @@ interface TriggerAutoSendRequestBody {
 }
 
 export async function action({request}: Route.ActionArgs) {
+    let responseHeaders = new Headers();
 
     try {
         const body: TriggerAutoSendRequestBody = await request.json();
@@ -40,7 +42,23 @@ export async function action({request}: Route.ActionArgs) {
         const payloadString = JSON.stringify(payloadObject, null, 2);
 
         console.log(`[AutoSend Action] Sending data for sensor ${sensorId}...`);
-        return await sendDeviceData(payloadString, connectionSettings);
+        const sendResult = await sendDeviceData(payloadString, connectionSettings);
+
+        // record history ---------------------------------------
+        try {
+            const historyResult = await messageHistoryService.addMessageRecord(request, {
+                sensorId: sensor.id,
+                apiKey: sensor.apiKey,
+                payloadSent: payloadObject,
+                dataSentResult: sendResult
+            });
+            //merge headers (history + response)
+            historyResult.headers.forEach((value, key) => responseHeaders.append(key, value));
+        } catch (historyError) {
+            console.error("Failed to record message history:", historyError);
+        }
+
+        return data(sendResult, {headers: responseHeaders});
 
     } catch (error) {
         console.error("[AutoSend Action] Error:", error);

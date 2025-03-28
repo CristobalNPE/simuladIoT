@@ -1,6 +1,6 @@
 import {type Sensor, UpdateSensorSchema} from "~/routes/devices/schemas/sensor.schema";
 import {href, useFetcher} from "react-router";
-import {getFormProps, getInputProps, useForm} from "@conform-to/react";
+import {getFormProps, getInputProps, type SubmissionResult, useForm} from "@conform-to/react";
 import {getZodConstraint, parseWithZod} from "@conform-to/zod";
 import {
     Dialog,
@@ -16,17 +16,23 @@ import {getSensorCategories} from "~/routes/devices/utils/sensor.utils";
 import {Label} from "~/components/ui/label";
 import {StatusButton} from "~/components/ui/status-button";
 import {useDialogAutoClose} from "~/hooks/use-dialog-autoclose";
-import type {clientAction} from "~/routes/devices/devices";
+import type {action} from "~/routes/devices/devices";
 
 interface UpdateSensorDialogProps {
     sensor: Sensor,
     children: React.ReactNode
 }
 
+
+function isSubmissionResult(data: any): data is SubmissionResult<any> {
+    return data != null && typeof data === 'object' && ('status' in data || 'error' in data || 'value' in data || 'intent' in data);
+}
 export function UpdateSensorDialog({sensor, children}: UpdateSensorDialogProps) {
 
-    const fetcher = useFetcher<typeof clientAction>({key: `update-sensor-${sensor.id}`})
+    const fetcher = useFetcher<typeof action>({key: `update-sensor-${sensor.id}`})
     const isPending = fetcher.state !== "idle";
+
+    const lastResult = !isPending && isSubmissionResult(fetcher.data) ? fetcher.data : null;
 
 
     const [form, fields] = useForm({
@@ -40,14 +46,14 @@ export function UpdateSensorDialog({sensor, children}: UpdateSensorDialogProps) 
             measurementsCount: sensor.measurementsCount,
             category: sensor.category
         },
-        lastResult: !isPending ? fetcher.data?.result : null,
+        lastResult: lastResult,
         onValidate({formData}) {
             return parseWithZod(formData, {schema: UpdateSensorSchema})
         },
         shouldRevalidate: "onBlur",
     })
 
-    const shouldClose = fetcher.data?.result?.status === "success" && !isPending;
+    const shouldClose = lastResult?.status === "success" && !isPending;
     const [open,setOpen] = useDialogAutoClose(shouldClose)
     return (
         <Dialog open={open} onOpenChange={setOpen}>

@@ -18,12 +18,12 @@ export function DeviceCardWithHistory({sensor, messages}: {
     messages: Message[],
 }) {
 
-    const fetcher = useFetcher({key: "delete-sensor"})
+    const deleteFetcher = useFetcher({key: `delete-sensor-${sensor.id}`})
     const [tab, setTab] = useState("payload")
     const {sensorStatus} = useSensor(sensor.id);
 
     return (
-        <div className="col-span-1 h-[calc(100dvh - 1rem)]">
+        <div className="col-span-1">
             <div className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="space-y-1">
 
@@ -73,13 +73,13 @@ export function DeviceCardWithHistory({sensor, messages}: {
                                     Editar dispositivo
                                 </Button>
                             </UpdateSensorDialog>
-                            <fetcher.Form action={href("/devices")} method={"POST"}>
+                            <deleteFetcher.Form action={href("/devices")} method={"POST"}>
                                 <input type="hidden" name="sensorId" value={sensor.id}/>
                                 <Button type="submit" name={"intent"} value={"delete-sensor"} variant="destructive">
                                     <Trash2 className="h-4 w-4"/>
                                     Eliminar dispositivo
                                 </Button>
-                            </fetcher.Form>
+                            </deleteFetcher.Form>
                         </div>
                     </TabsContent>
                     <TabsContent value="messages" className="space-y-4 pt-4">

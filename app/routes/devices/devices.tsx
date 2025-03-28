@@ -2,10 +2,13 @@ import React from "react";
 import type {Route} from "./+types/devices";
 import {createActionHandler, type HandlerResult} from "~/routes/settings/handler/connection-settings-handler";
 import {CreateSensorSchema, DeleteSensorSchema, UpdateSensorSchema} from "~/routes/devices/schemas/sensor.schema";
-import {data, Outlet, useSearchParams} from "react-router";
+import {data, Outlet, redirect, useSearchParams} from "react-router";
 import {DevicesGrid} from "~/routes/devices/components/devices-grid";
 import {sensorDataSentSchema, sensorModifyPayloadSchema} from "~/routes/devices/schemas/sensor-data.schema";
 import {sensorSessionService} from "~/routes/devices/services/sensor-session.server";
+import {z} from "zod";
+import {messageHistoryService} from "~/routes/devices/services/message-history.server";
+import {connectionStorageService} from "~/routes/settings/services/connection-storage.service";
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -37,15 +40,20 @@ const sensorHandlers: Record<string, RequestHandler> = {
         sensorModifyPayloadSchema,
         (request, value) => sensorSessionService.updateSensorPayload(request, value)
     ),
-    // "send-device-payload": createActionHandler(
-    //     sensorDataSentSchema,
-    //     (value) => sensorDataService.sendDeviceData(value)
-    // )
+    "clear-history": createActionHandler(
+        z.object({sensorId: z.string()}),
+        (request, value) => messageHistoryService.clearHistoryForSensor(request, value.sensorId)
+    ),
 }
 
 
 export async function loader({request}: Route.LoaderArgs) {
     const sensors = await sensorSessionService.getAllSensors(request);
+    const connectionSettings = await connectionStorageService.getCurrentConnectionSettings(request);
+
+    if (!connectionSettings.broker || !connectionSettings.http) {
+        throw redirect("/settings");
+    }
     return {sensors};
 }
 

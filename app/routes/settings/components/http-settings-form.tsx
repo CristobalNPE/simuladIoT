@@ -4,12 +4,22 @@ import {getFormProps, getInputProps, useForm} from "@conform-to/react";
 import {getZodConstraint, parseWithZod} from "@conform-to/zod";
 import {ErrorList, Field} from "~/components/forms";
 import {StatusButton} from "~/components/ui/status-button";
-import React from "react";
+import React, {useRef} from "react";
 import type {action} from "~/routes/settings/settings";
+import {Button} from "~/components/ui/button";
+import {Unplug} from "lucide-react";
+import {cn} from "~/lib/utils";
+
+type TestConnectionResult = { success: boolean; message: string };
 
 export function HttpSettingsForm({currentSettings}: { currentSettings: HttpConnectionSettings }) {
-    const fetcher = useFetcher<typeof action>(({key: "http-connection-settings"}))
-    const isPending = fetcher.state !== "idle"
+    const saveFetcher = useFetcher<typeof action>(({key: "http-connection-settings"}))
+    const testFetcher = useFetcher<TestConnectionResult>({key: "http-test-connection"})
+
+    const isSaving = saveFetcher.state !== "idle"
+    const isTesting = testFetcher.state !== "idle"
+
+    const formRef = useRef<HTMLFormElement>(null);
 
     const [form, fields] = useForm({
         id: `http-connection-settings-form`,
@@ -17,19 +27,32 @@ export function HttpSettingsForm({currentSettings}: { currentSettings: HttpConne
         defaultValue: {
             ...currentSettings
         },
-        lastResult: !isPending ? fetcher.data?.result : null,
+        lastResult: !isSaving ? saveFetcher.data?.result : null,
         onValidate({formData}) {
             return parseWithZod(formData, {schema: HttpConnectionSettingsSchema})
         },
         shouldRevalidate: "onBlur",
     })
 
+    const handleTestConnection = () => {
+        if (!formRef.current) return;
 
-    // useSuccessToast(fetcher, "Configuración HTTP guardada correctamente.")
+        const formData = new FormData(formRef.current);
+        formData.set("connectionType", "http");
+
+        testFetcher.submit(formData, {
+            method: "post",
+            action: "/api/test-connection",
+        });
+    }
+
+
+    // useSuccessToast(saveFetcher, "Configuración HTTP guardada correctamente.")
 
     return (
         <>
-            <fetcher.Form
+            <saveFetcher.Form
+                ref={formRef}
                 action={href("/settings")}
                 method={"POST"}
                 {...getFormProps(form)}
@@ -47,24 +70,27 @@ export function HttpSettingsForm({currentSettings}: { currentSettings: HttpConne
                        errors={fields.connectionString.errors}
                 />
                 <ErrorList errors={form.errors} id={form.errorId}/>
-                {/*<div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">*/}
-                {/*    <Button*/}
-                {/*        onClick={handleTestConnection}*/}
-                {/*        variant="outline"*/}
-                {/*        className="flex items-center gap-2"*/}
-                {/*        disabled={!isValidConnectionString || isTestingConnection}*/}
-                {/*    >*/}
-                {/*        <Unplug className="h-4 w-4"/>*/}
-                {/*        {delayedIsTestingConnection ? "Probando..." : "Probar Conexión"}*/}
-                {/*    </Button>*/}
+                <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center my-4">
+                    <Button
+                        type="button"
+                        onClick={handleTestConnection}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                        disabled={isTesting || isSaving}
+                    >
+                        <Unplug className="h-4 w-4" />
+                        {isTesting ? "Probando..." : "Probar Conexión"}
+                    </Button>
 
-                {/*    <div*/}
-                {/*        className="flex-1 px-3 py-2 bg-muted rounded-md text-sm font-mono overflow-hidden text-ellipsis">*/}
-                {/*        {connectionString}*/}
-                {/*    </div>*/}
-
-                {/*    <ConnectionStatusBadge type={"http"}/>*/}
-                {/*</div>*/}
+                    {testFetcher.data && !isTesting && (
+                        <div className={cn(
+                            "px-3 py-1 rounded text-sm",
+                            testFetcher.data.success ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        )}>
+                            {testFetcher.data.message}
+                        </div>
+                    )}
+                </div>
 
                 <div className={"flex justify-center mt-6"}>
                     <StatusButton
@@ -72,14 +98,14 @@ export function HttpSettingsForm({currentSettings}: { currentSettings: HttpConne
                         name={"intent"}
                         value={"update-http-settings"}
                         form={form.id}
-                        status={isPending ? "pending" : form.status ?? "idle"}
+                        status={isSaving ? "pending" : form.status ?? "idle"}
                         type="submit"
-                        disabled={isPending}
+                        disabled={isSaving}
                     >
                         Guardar Configuración
                     </StatusButton>
                 </div>
-            </fetcher.Form>
+            </saveFetcher.Form>
         </>
     )
 }

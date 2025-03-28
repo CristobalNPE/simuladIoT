@@ -1,12 +1,11 @@
 import type {Route} from "./+types/device-single";
 import {SectionHeader} from "~/components/section-header";
-import React, {useCallback, useEffect, useState} from "react";
-import {redirect} from "react-router";
+import React, {useEffect} from "react";
 import {DeviceCardWithHistory} from "~/routes/devices/components/device-card-full";
 import {Badge} from "~/components/ui/badge";
-import {messageHistoryService} from "~/routes/devices/services/message-history.service";
-import type {Message} from "~/routes/devices/schemas/message.schema";
 import {sensorSessionService} from "~/routes/devices/services/sensor-session.server";
+import {messageHistoryService} from "~/routes/devices/services/message-history.server";
+import {href, redirect, useRevalidator} from "react-router";
 
 
 export function meta({matches}: Route.MetaArgs) {
@@ -26,40 +25,40 @@ export function meta({matches}: Route.MetaArgs) {
 }
 
 export async function loader({request, params}: Route.LoaderArgs) {
+    const sensorId = params.deviceId;
+    if (!sensorId) throw new Response("Not Found", {status: 404});
 
-    const sensor = await sensorSessionService.getSensorById(request, params.deviceId);
+    const [sensor, history] = await Promise.all([
+        sensorSessionService.getSensorById(request, sensorId),
+        messageHistoryService.getHistoryForSensor(request, sensorId)
+    ]);
+    if (!sensor) throw redirect(href("/devices"));
 
-    if (!sensor) {
-        throw redirect("/settings");
-    }
-
-    return {
-        sensor,
-    };
+    return {sensor, history};
 }
 
 export default function DeviceSingle({loaderData}: Route.ComponentProps) {
 
-    const {sensor} = loaderData;
+    const {sensor, history} = loaderData;
+    const revalidator = useRevalidator();
 
-    const [messages, setMessages] = useState<Message[]>([]);
-
-    const refreshMessages = useCallback(() => {
-        const newMessages = messageHistoryService.getMessageHistoryBySensorId(sensor.id);
-        setMessages(prevMessages => {
-            if (JSON.stringify(newMessages) !== JSON.stringify(prevMessages)) {
-                return newMessages;
-            }
-            return prevMessages;
-        });
-    }, [sensor.id]);
-
+    // poll for history updates by revalidating the loader data
     useEffect(() => {
-        refreshMessages();
-        const intervalId = setInterval(refreshMessages, 1000);
-        return () => clearInterval(intervalId);
-    }, [sensor.id, refreshMessages]);
+        revalidator.revalidate();
 
+        console.log(`[History Poll] Starting for ${sensor.id}`);
+        const intervalId = setInterval(() => {
+            console.log(`[History Poll] Revalidating for ${sensor.id}`);
+            if (revalidator.state === 'idle') { // only  if not already loading
+                revalidator.revalidate();
+            }
+        }, 3000); // todo: every 3 seconds? (adjust ?)
+
+        return () => {
+            console.log(`[History Poll] Stopping for ${sensor.id}`);
+            clearInterval(intervalId);
+        };
+    }, [sensor.id]);
 
     return (
         <div className={"col-span-3  bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-6 shadow-sm"}>
@@ -75,7 +74,7 @@ export default function DeviceSingle({loaderData}: Route.ComponentProps) {
             <DeviceCardWithHistory
                 key={`${sensor.id}-${JSON.stringify(sensor.payload)}`}
                 sensor={sensor}
-                messages={messages}
+                messages={history}
             />
 
         </div>

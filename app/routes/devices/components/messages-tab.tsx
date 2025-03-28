@@ -5,9 +5,13 @@ import {ScrollArea} from "~/components/ui/scroll-area"
 import type {Message} from "../schemas/message.schema"
 import {cn} from "~/lib/utils";
 import {messageHistoryService} from "~/routes/devices/services/message-history.service";
+import {href, useFetcher} from "react-router";
 
 
 export function MessagesTab({messages,sensorId}: { messages: Message[], sensorId: string }) {
+
+    const clearHistoryFetcher = useFetcher(({key: `clear-history-${sensorId}`}))
+    const isClearing = clearHistoryFetcher.state !== "idle";
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString)
@@ -19,6 +23,18 @@ export function MessagesTab({messages,sensorId}: { messages: Message[], sensorId
         : `Mostrando los últimos ${messages.length} mensajes del dispositivo`
 
     const isSuccessResponse = (responseStatus: number) => responseStatus >= 200 && responseStatus < 300;
+
+    const handleClearHistory = () => {
+
+        const formData = new FormData();
+        formData.set("intent", "clear-history");
+        formData.set("sensorId", sensorId);
+
+        clearHistoryFetcher.submit(formData, {
+            method: "post",
+            action: href("/devices"), // TODO: DEFINE THE ACTION ? WHERE
+        });
+    };
 
     return (
         <div>
@@ -84,9 +100,14 @@ export function MessagesTab({messages,sensorId}: { messages: Message[], sensorId
                 )}
 
                 <div className="flex justify-end mt-4">
-                    <Button variant="outline" size="sm" onClick={() => messageHistoryService.clearHistoryForSensor(sensorId)}>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleClearHistory}
+                        disabled={isClearing || messages.length === 0}
+                    >
                         <Trash2 className="mr-2 h-4 w-4"/>
-                        Limpiar Historial
+                        {isClearing ? "Limpiando..." : "Limpiar Historial"}
                     </Button>
                 </div>
             </div>
