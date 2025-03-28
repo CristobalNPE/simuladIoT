@@ -3,32 +3,40 @@ import {BrokerTypeSchema} from "~/types/broker.types";
 
 //ty gemini 🤖
 const isValidBrokerUri = (uri: string): boolean => {
+
+    console.log(`Received broker URI: ${uri}`);
     try {
-        // Basic check for common schemes and host/port structure
-        const commonBrokerRegex = /^(tcp|ssl|mqtt|mqtts|amqp|amqps):\/\/([^:/]+)(:\d+)?$/;
+        // Allows for optional user:pass@ before the host
+        const commonBrokerRegex = /^(tcp|ssl|mqtt|mqtts|amqp|amqps):\/\/(?:[^:@/]+(?::[^@/]+)?@)?([^:/]+)(:\d+)?$/;
+        // Explanation:
+        // ^(tcp|...|amqps):  // Scheme
+        // \/\/                // Separator
+        // (?:                 // Start optional user:pass group (non-capturing)
+        //   [^:@/]+           // Username (no ':', '@', '/')
+        //   (?::[^@/]+)?      // Optional ':password' (no '@', '/')
+        // @)?                 // End optional user:pass group, followed by '@'
+        // ([^:/]+)            // Hostname (capture group 2 - no ':' or '/')
+        // (:\d+)?             // Optional ':port' (capture group 3)
+        // $                   // End of string
+
         if (commonBrokerRegex.test(uri)) {
-            // Further parsing could be done here if needed (e.g., validate port range)
+            console.log(`Common broker regex matched: ${uri}`);
             return true;
         }
-        // Allow ActiveMQ Artemis specific format (if needed)
-        // Example: (tcp://host:port,tcp://host2:port)?option=value
         const artemisRegex = /^\((tcp|ssl):\/\/[^,]+(,(tcp|ssl):\/\/[^,]+)*\)(\?.+)?$/;
         if (artemisRegex.test(uri)) {
+            console.log(`Artemis broker regex matched: ${uri}`);
             return true;
         }
-
-        // Add checks for other specific formats if necessary
-
-        // If it's an HTTP URL (for activemq-http) let the URL validator catch it later?
-        // Or specifically allow http/https here too? Depends on your 'activemq-http' handling.
-        // Let's allow http/https here for flexibility with activemq-http derived URLs
         if (uri.startsWith('http://') || uri.startsWith('https://')) {
-            return true; // Rely on URL validation if broker is activemq-http
+            console.log(`ActiveMQ HTTP broker regex matched: ${uri}`);
+            return true;
         }
-
-        return false; // Doesn't match known patterns
+        console.log(`Unknown broker regex matched: ${uri}`);
+        return false;
     } catch (e) {
-        // Errors during regex or URL parsing
+        console.log(`Error during broker URI check: ${e}`);
+
         return false;
     }
 };

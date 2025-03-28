@@ -3,13 +3,15 @@ import {z} from "zod";
 export const BROKER_TYPES = {
     KAFKA: 'kafka',
     RABBITMQ: 'rabbitmq',
-    ACTIVEMQ_HTTP: 'activemq-http'
+    ACTIVEMQ_HTTP: 'activemq-http',
+    MQTT: 'mqtt'
 } as const;
 
 export const BrokerTypeSchema = z.enum([
     BROKER_TYPES.KAFKA,
     BROKER_TYPES.RABBITMQ,
-    BROKER_TYPES.ACTIVEMQ_HTTP
+    BROKER_TYPES.ACTIVEMQ_HTTP,
+    BROKER_TYPES.MQTT
 ]);
 
 export type BrokerType = z.infer<typeof BrokerTypeSchema>;
@@ -35,6 +37,10 @@ export const brokerTypeMetadata: Record<BrokerType, BrokerTypeMetadata> = {
     [BROKER_TYPES.ACTIVEMQ_HTTP]: {
         label: 'ActiveMQ (HTTP)',
         requiresAuth: true
+    },
+    [BROKER_TYPES.MQTT]: {
+        label: 'MQTT',
+        requiresAuth: false
     }
 };
 brokerTypeMetadataSchema.parse(brokerTypeMetadata);
