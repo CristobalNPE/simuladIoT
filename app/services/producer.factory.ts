@@ -17,11 +17,11 @@ export function createProducer(brokerType: BrokerType, config: ProducerConfig): 
             return new MqttProducer(config);
         }
 
-        case BROKER_TYPES.KAFKA: {
-            if (!config.connectionString) throw new Error("Kafka connection string required.");
-            throw new Error("Kafka direct implementation not handled by factory. Refactor to KafkaProducer class.");
-
-        }
+        // case BROKER_TYPES.KAFKA: {
+        //     if (!config.connectionString) throw new Error("Kafka connection string required.");
+        //     throw new Error("Kafka direct implementation not handled by factory. Refactor to KafkaProducer class.");
+        //
+        // }
 
         case BROKER_TYPES.RABBITMQ: {
             if (!config.connectionString) throw new Error("RabbitMQ connection string required (amqp[s]://...).");

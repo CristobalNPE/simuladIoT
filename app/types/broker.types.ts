@@ -1,14 +1,14 @@
 import {z} from "zod";
 
 export const BROKER_TYPES = {
-    KAFKA: 'kafka',
+    // KAFKA: 'kafka',
     RABBITMQ: 'rabbitmq',
     ACTIVEMQ_HTTP: 'activemq-http',
     MQTT: 'mqtt'
 } as const;
 
 export const BrokerTypeSchema = z.enum([
-    BROKER_TYPES.KAFKA,
+    // BROKER_TYPES.KAFKA,
     BROKER_TYPES.RABBITMQ,
     BROKER_TYPES.ACTIVEMQ_HTTP,
     BROKER_TYPES.MQTT
@@ -26,10 +26,10 @@ export type BrokerTypeMetadata = z.infer<typeof BrokerMetadataSchema>;
 export const brokerTypeMetadataSchema = z.record(BrokerTypeSchema, BrokerMetadataSchema);
 
 export const brokerTypeMetadata: Record<BrokerType, BrokerTypeMetadata> = {
-    [BROKER_TYPES.KAFKA]: {
-        label: 'Apache Kafka',
-        requiresAuth: false
-    },
+    // [BROKER_TYPES.KAFKA]: {
+    //     label: 'Apache Kafka',
+    //     requiresAuth: false
+    // },
     [BROKER_TYPES.RABBITMQ]: {
         label: 'RabbitMQ',
         requiresAuth: false
