@@ -6,7 +6,7 @@ import {
     type UpdateSensor
 } from "~/routes/devices/schemas/sensor.schema";
 import type {Session} from "react-router";
-import {commitSession, getSession} from "~/routes/settings/sessions/session-storage.server";
+import {commitSession, getSession} from "~/services/session.server";
 import {generateSamplePayload} from "~/routes/devices/utils/payload.utils";
 import type {SensorModifyPayload} from "../schemas/sensor-data.schema";
 

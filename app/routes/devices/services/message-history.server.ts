@@ -1,6 +1,6 @@
 import type {Message} from "~/routes/devices/schemas/message.schema";
 import type {Session} from "react-router";
-import {commitSession, getSession} from "~/routes/settings/sessions/session-storage.server";
+import {commitSession, getSession} from "~/services/session.server";
 import {v4 as uuidv4} from 'uuid';
 
 const HISTORY_KEY = 'session_message_history';

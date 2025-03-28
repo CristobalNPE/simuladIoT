@@ -17,6 +17,7 @@ import {Label} from "~/components/ui/label";
 import {StatusButton} from "~/components/ui/status-button";
 import {useDialogAutoClose} from "~/hooks/use-dialog-autoclose";
 import type {action} from "~/routes/devices/devices";
+import {isSubmissionResult} from "~/utils/conform-utils";
 
 interface UpdateSensorDialogProps {
     sensor: Sensor,
@@ -24,9 +25,6 @@ interface UpdateSensorDialogProps {
 }
 
 
-function isSubmissionResult(data: any): data is SubmissionResult<any> {
-    return data != null && typeof data === 'object' && ('status' in data || 'error' in data || 'value' in data || 'intent' in data);
-}
 export function UpdateSensorDialog({sensor, children}: UpdateSensorDialogProps) {
 
     const fetcher = useFetcher<typeof action>({key: `update-sensor-${sensor.id}`})

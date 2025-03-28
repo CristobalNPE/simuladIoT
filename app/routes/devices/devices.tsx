@@ -1,6 +1,9 @@
 import React from "react";
 import type {Route} from "./+types/devices";
-import {createActionHandler, type HandlerResult} from "~/routes/settings/handler/connection-settings-handler";
+import {
+    createActionHandler,
+    type RequestHandler
+} from "~/utils/action-handler";
 import {CreateSensorSchema, DeleteSensorSchema, UpdateSensorSchema} from "~/routes/devices/schemas/sensor.schema";
 import {data, Outlet, redirect, useSearchParams} from "react-router";
 import {DevicesGrid} from "~/routes/devices/components/devices-grid";
@@ -17,7 +20,6 @@ export function meta({}: Route.MetaArgs) {
     ];
 }
 
-type RequestHandler = (request: Request, formData: FormData) => Promise<HandlerResult>
 
 const sensorHandlers: Record<string, RequestHandler> = {
     "create-sensor": createActionHandler(
@@ -49,11 +51,12 @@ const sensorHandlers: Record<string, RequestHandler> = {
 
 export async function loader({request}: Route.LoaderArgs) {
     const sensors = await sensorSessionService.getAllSensors(request);
-    const connectionSettings = await connectionStorageService.getCurrentConnectionSettings(request);
+    const connectionsConfigured = await connectionStorageService.checkConnectionsExist(request);
 
-    if (!connectionSettings.broker || !connectionSettings.http) {
+    if (!connectionsConfigured) {
         throw redirect("/settings");
     }
+
     return {sensors};
 }
 

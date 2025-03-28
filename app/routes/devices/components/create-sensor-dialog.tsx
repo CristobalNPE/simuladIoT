@@ -18,14 +18,11 @@ import {StatusButton} from "~/components/ui/status-button";
 import {useDialogAutoClose} from "~/hooks/use-dialog-autoclose";
 import type {action} from "~/routes/devices/devices";
 import type {SensorCategory} from "~/routes/devices/schemas/sensor-types.schema";
+import {isSubmissionResult} from "~/utils/conform-utils";
 
 interface CreateSensorDialogProps {
     type: SensorType,
     children: React.ReactNode
-}
-
-function isSubmissionResult(data: any): data is SubmissionResult<any> {
-    return data != null && typeof data === 'object' && ('status' in data || 'error' in data || 'value' in data || 'intent' in data);
 }
 
 const DEFAULT_SENSOR_CATEGORY: SensorCategory = 'temperature';

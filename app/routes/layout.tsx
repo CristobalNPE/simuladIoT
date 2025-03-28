@@ -64,16 +64,43 @@ function SidePanel({sensors, connectionsConfigured}: { sensors: Sensor[], connec
             </CardHeader>
             <CardContent className={"flex flex-col gap-6 "}>
                 <nav className={"flex flex-col gap-2 "}>
-                    {navigationLinks.map((link, index) =>
-                        <NavLink
-                            key={index}
-                            to={link.to}
-                            className={({isActive, isPending}) =>
-                                cn("border p-2 px-3 text-sm rounded-md", isActive && "bg-primary text-primary-foreground")
-                            }
-                        >
-                            {link.name}
-                        </NavLink>
+                    {navigationLinks.map((link, index) => {
+
+                        if (link.to === "/devices" && !connectionsConfigured) {
+                            return (
+                                    <Tooltip >
+                                        <TooltipTrigger asChild>
+                                            <div
+                                                key={index}
+                                                className={cn("border p-2 px-3 text-sm rounded-md cursor-not-allowed text-muted-foreground")}
+                                            >
+                                                {link.name}
+                                            </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent side={"right"}>
+                                            <p>Requiere configuración de conexiones</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+
+                            );
+                        }
+
+                        return (
+                            <NavLink
+                                key={index}
+                                to={link.to}
+                                className={({isActive, isPending}) =>
+                                    cn("border p-2 px-3 text-sm rounded-md",
+                                        isActive && "bg-primary text-primary-foreground",
+                                    )
+                                }
+                            >
+                                {link.name}
+                            </NavLink>
+                        )
+
+                        }
+
                     )}
                 </nav>
                 <div className={"flex justify-between gap-2 flex-wrap"}>

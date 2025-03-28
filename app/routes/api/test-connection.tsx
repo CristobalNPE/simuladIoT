@@ -26,7 +26,7 @@ export async function action({request}: Route.ActionArgs) {
             throw new Error("connectionType not specified in form data.");
         }
         if (!connectionString) {
-            throw new Error("connectionString not provided in form data.");
+            throw new Error("String de Conexión no definida o no válida.");
         }
 
         if (connectionType === 'http') {
@@ -75,7 +75,7 @@ export async function action({request}: Route.ActionArgs) {
 
     } catch (error) {
         console.error("[Test Connection Action] Error:", error);
-        const message = error instanceof Error ? error.message : "Unknown error during connection test.";
+        const message = error instanceof Error ? error.message : "Error desconocido durante la prueba de conexión.";
         return data<TestConnectionResult>({status: 'error', message}, {status: 500});
     }
 

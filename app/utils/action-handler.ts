@@ -7,11 +7,12 @@ type ApplyMethod<T> = (
     value: T
 ) => Promise<{ headers: Headers }>;
 
-export interface HandlerResult {
-    conformResult: Record<string, any>;  // result from submission.reply()
+interface HandlerResult {
+    conformResult: SubmissionResult<any> | Record<string, any>;
     headers?: Headers;
 }
 
+export type RequestHandler = (request: Request, formData: FormData) => Promise<HandlerResult>
 
 export function createActionHandler<T>(
     schema: z.ZodSchema<T>,

@@ -7,13 +7,15 @@ import {getFormProps, getInputProps, useForm} from "@conform-to/react";
 import {getZodConstraint, parseWithZod} from "@conform-to/zod";
 import {ErrorList, Field, SelectField} from "~/components/forms";
 import {StatusButton} from "~/components/ui/status-button";
-import React, {useRef} from "react";
+import React, {useEffect, useRef} from "react";
 import {brokerRequiresAuth, type BrokerType, brokerTypeMetadata, getAllBrokerTypes} from "~/types/broker.types";
 import {Label} from "~/components/ui/label";
 import {cn} from "~/lib/utils";
 import type {action} from "~/routes/settings/settings";
 import {ConnectionTestResult} from "~/routes/settings/components/connection-test-result";
 import type {TestConnectionResult} from "~/routes/api/types/connection-test.types";
+import {isSubmissionResult} from "~/utils/conform-utils";
+import {toast} from "sonner";
 
 
 export function BrokerSettingsForm({currentSettings}: { currentSettings: BrokerConnectionSettings }) {
@@ -23,6 +25,8 @@ export function BrokerSettingsForm({currentSettings}: { currentSettings: BrokerC
     const isSaving = saveFetcher.state !== "idle"
     const isTesting = testFetcher.state !== "idle"
 
+    const lastResult = !isSaving && isSubmissionResult(saveFetcher.data) ? saveFetcher.data : null;
+
     const formRef = useRef<HTMLFormElement>(null);
 
     const [form, fields] = useForm({
@@ -31,7 +35,7 @@ export function BrokerSettingsForm({currentSettings}: { currentSettings: BrokerC
         defaultValue: {
             ...currentSettings
         },
-        lastResult: !isSaving ? saveFetcher.data?.result : null,
+        lastResult: lastResult,
         onValidate({formData}) {
             return parseWithZod(formData, {schema: BrokerConnectionSettingsSchema})
         },
@@ -52,8 +56,13 @@ export function BrokerSettingsForm({currentSettings}: { currentSettings: BrokerC
         });
     }
 
+    //toast
+    useEffect(() => {
+        if (saveFetcher.state === "idle" && saveFetcher.data?.status === "success") {
+            toast.success("Configuración del Broker guardada correctamente.");
+        }
+    }, [saveFetcher.state, saveFetcher.data]);
 
-    // useSuccessToast(saveFetcher, "Configuración del Broker guardada correctamente.") // todo: make toast work server side
 
     return (
         <>
@@ -93,7 +102,7 @@ export function BrokerSettingsForm({currentSettings}: { currentSettings: BrokerC
                                 name: brokerTypeMetadata[type].label,
                                 value: type
                             }))}
-                            placeholder={"Tipo de Broker"}
+                            placeholder={"Seleccione  Broker"}
                         />
                     </div>
 

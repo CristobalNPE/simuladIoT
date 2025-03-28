@@ -2,13 +2,13 @@ import {Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData,} from "r
 
 import type {Route} from "./+types/root";
 import "./app.css";
-import {themeSessionResolver} from "~/sessions.server";
 import {PreventFlashOnWrongTheme, type Theme, ThemeProvider, useTheme} from "remix-themes";
 import React from "react";
 import {TooltipProvider} from "~/components/ui/tooltip";
 import {Toaster} from "sonner";
 import {SensorProvider} from "./routes/devices/context/sensor-context";
 import {configureZodErrorMap} from "~/config/zod-config";
+import {themeSessionResolver} from "~/services/session.server";
 
 export const links: Route.LinksFunction = () => [
     {rel: "preconnect", href: "https://fonts.googleapis.com"},
