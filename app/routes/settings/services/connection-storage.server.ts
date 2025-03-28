@@ -27,55 +27,55 @@ export const connectionStorageServer = {
 
     async getHttpConnectionSettingsFromRequest(request: Request): Promise<HttpConnectionSettings> {
         const session = await getSession(request.headers.get("Cookie"));
-        let httpSettings: HttpConnectionSettings;
+        const settingsData = session.get(HTTP_SETTINGS_KEY);
 
-        try {
-            httpSettings = HttpConnectionSettingsSchema.parse(session.get(HTTP_SETTINGS_KEY));
-            console.log(`Http settings parsed from session:`, httpSettings);
-        } catch (error) {
-            console.error("Error parsing broker settings from session, using defaults", error);
-            await this.storeHttpConnectionSettings(request, defaultHttpSettings);
+        const parseResult = HttpConnectionSettingsSchema.safeParse(settingsData);
+        if (parseResult.success) {
+            return parseResult.data;
+        } else {
             return defaultHttpSettings;
         }
-        return httpSettings;
     },
 
     async storeHttpConnectionSettings(request: Request, settings: HttpConnectionSettings): Promise<{
         headers: Headers
     }> {
         const session = await getSession(request.headers.get("Cookie"));
-        session.set(HTTP_SETTINGS_KEY, settings);
+
+        const validatedSettings = HttpConnectionSettingsSchema.parse(settings);
+        session.set(HTTP_SETTINGS_KEY, validatedSettings);
         const headers = new Headers({"Set-Cookie": await commitSession(session)});
+        console.log(`Stored HTTP settings in session.`);
         return {headers};
     },
 
     async getBrokerConnectionSettingsFromRequest(request: Request): Promise<BrokerConnectionSettings> {
         const session = await getSession(request.headers.get("Cookie"));
-        let brokerSettings: BrokerConnectionSettings;
+        const settingsData = session.get(BROKER_SETTINGS_KEY);
 
-        try {
-            brokerSettings = BrokerConnectionSettingsSchema.parse(session.get(BROKER_SETTINGS_KEY));
-            console.log(`Broker settings parsed from session:`, brokerSettings);
-        } catch (error) {
-            console.error("Error parsing broker settings from session, using defaults", error);
-            await this.storeBrokerConnectionSettings(request, defaultBrokerSettings);
+        const parseResult = BrokerConnectionSettingsSchema.safeParse(settingsData);
+        if (parseResult.success) {
+            return parseResult.data;
+        } else {
             return defaultBrokerSettings;
         }
-        return brokerSettings;
     },
 
     async storeBrokerConnectionSettings(request: Request, settings: BrokerConnectionSettings): Promise<{
         headers: Headers
     }> {
         const session = await getSession(request.headers.get("Cookie"));
-        session.set(BROKER_SETTINGS_KEY, settings);
+
+        const validatedSettings = BrokerConnectionSettingsSchema.parse(settings);
+        session.set(BROKER_SETTINGS_KEY, validatedSettings);
         const headers = new Headers({"Set-Cookie": await commitSession(session)});
+        console.log(`Stored Broker settings in session.`);
         return {headers};
     },
 
     async getCurrentConnectionSettings(request: Request): Promise<{
-        broker: BrokerConnectionSettings | null | undefined,
-        http: HttpConnectionSettings | null | undefined
+        broker: BrokerConnectionSettings,
+        http: HttpConnectionSettings
     }> {
         return {
             broker: await this.getBrokerConnectionSettingsFromRequest(request),
