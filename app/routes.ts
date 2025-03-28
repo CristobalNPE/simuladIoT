@@ -3,8 +3,8 @@ import {index, layout, route, type RouteConfig} from "@react-router/dev/routes";
 export default [
 
     //actions
-    route("/action/set-theme", "routes/action.set-theme.ts"),
-    route("send-to-broker", "routes/action.send-message-to-broker.ts"),
+    route("/action/set-theme", "routes/api/action.set-theme.ts"),
+    route("send-to-broker", "routes/api/action.send-message-to-broker.ts"),
     route("api/trigger-auto-send", "routes/api/action.trigger-auto-send.ts"),
     route("api/test-connection", "routes/api/action.test-connection.ts"),
 
